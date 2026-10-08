@@ -1,15 +1,329 @@
 // ==UserScript==
-// @name         MIMI CEIR CHECKER 8.4 (mirror)
-// @namespace    https://github.com/<your-account>/ceir-checker-html
-// @version      8.4
-// @description  Mirror of the WebView2-injected script from CeirChecker.exe for research. Runs only on ceir.gov.mm via Tampermonkey.
-// @author       MIMO (original), mirror for analysis
+// @name         CEIR Read-Only Checker
+// @namespace    https://github.com/
+// @version      1.0.0
+// @description  Activation-free, read-only helper using a manually obtained altchaData token.
 // @match        https://ceir.gov.mm/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
-// Authorized derivative: license activation and server-side token validation were removed.
-// The remaining CEIR functionality is obfuscated; review its network behavior before use.
-// The original source attribution and string table are retained.
 
-(function(_0x52af0c,_0x4b1137){var _0x2adb81=a0_0x2691,_0x1784b7=_0x52af0c();while(!![]){try{var _0x1ec8fd=-parseInt(_0x2adb81(0x15a))/0x1+-parseInt(_0x2adb81(0x110))/0x2*(parseInt(_0x2adb81(0x298))/0x3)+parseInt(_0x2adb81(0x32c))/0x4+-parseInt(_0x2adb81(0x1c8))/0x5*(-parseInt(_0x2adb81(0x1be))/0x6)+-parseInt(_0x2adb81(0x326))/0x7*(-parseInt(_0x2adb81(0x8c))/0x8)+parseInt(_0x2adb81(0x345))/0x9*(-parseInt(_0x2adb81(0xd7))/0xa)+parseInt(_0x2adb81(0x18e))/0xb;if(_0x1ec8fd===_0x4b1137)break;else _0x1784b7['push'](_0x1784b7['shift']());}catch(_0x404c08){_0x1784b7['push'](_0x1784b7['shift']());}}}(a0_0x34d4,0x3a3b5),(function(){'use strict';var _0x1378a6=a0_0x2691;var _0x76e154=null;var _0x3e1a45=_0x1378a6;var _0x3b8c8e=![];function _0x4dabfb(){var _0x7f97f2=a0_0x2691;if(_0x3b8c8e)return;_0x3b8c8e=!![];try{var _0x324d5d=document[_0x7f97f2(0x139)](_0x7f97f2(0xea));if(_0x324d5d)_0x324d5d['classList'][_0x7f97f2(0x2b9)](_0x7f97f2(0x22f));}catch(_0x262552){}}var _0x51f8e5=document[_0x3e1a45(0x2c2)](_0x3e1a45(0x239));_0x51f8e5[_0x3e1a45(0xa4)]=_0x3e1a45(0x2c1),_0x51f8e5[_0x3e1a45(0x2fa)]=!![],_0x51f8e5['onload']=_0x4dabfb,_0x51f8e5['onerror']=function(){var _0x34a9d0=_0x3e1a45;_0x4dabfb();var _0x2d1e7e=document[_0x34a9d0(0x2c2)](_0x34a9d0(0x239));_0x2d1e7e['src']='https://unpkg.com/@tailwindcss/browser@4',_0x2d1e7e[_0x34a9d0(0x2fa)]=!![],_0x2d1e7e['onload']=_0x4dabfb,_0x2d1e7e[_0x34a9d0(0x15f)]=_0x4dabfb,document[_0x34a9d0(0x317)][_0x34a9d0(0xbb)](_0x2d1e7e);},document[_0x3e1a45(0x317)][_0x3e1a45(0xbb)](_0x51f8e5),setTimeout(_0x4dabfb,0x9c4),setTimeout(_0x4dabfb,0x1770);var _0x1558bc=document[_0x3e1a45(0x2c2)](_0x3e1a45(0x1ef));_0x1558bc['textContent']=[_0x3e1a45(0x1da),_0x3e1a45(0x1fa),_0x3e1a45(0x263),_0x3e1a45(0xa9),'--primary:#818cf8;--primary-foreground:#0b1020;',_0x3e1a45(0x319),_0x3e1a45(0x238),'--accent:#1a2340;--accent-foreground:#e7ecf5;',_0x3e1a45(0xb1),_0x3e1a45(0x132),_0x3e1a45(0x336),_0x3e1a45(0x11e),_0x3e1a45(0x1a0),_0x3e1a45(0x107),_0x3e1a45(0xfa),'--ceir-green:#6ee7b7;--ceir-green-bg:rgba(52,211,153,.15);',_0x3e1a45(0x221),_0x3e1a45(0x331),_0x3e1a45(0x248),'--ceir-row-hover:#182038;--ceir-sidebar-bg:#0f1528;','--ceir-cyan:#67e8f9;--ceir-cyan-bg:rgba(103,232,249,.12);--ceir-magenta:#c084fc;',_0x3e1a45(0x2f0),_0x3e1a45(0x24d),_0x3e1a45(0x2f6),_0x3e1a45(0x124),_0x3e1a45(0x1e7),_0x3e1a45(0xbf),_0x3e1a45(0x198),_0x3e1a45(0x152),_0x3e1a45(0x2b2),'--md-sys-color-secondary-container:var(--secondary);--md-sys-color-on-secondary-container:var(--secondary-foreground);',_0x3e1a45(0x179),'--md-sys-color-surface-container-low:var(--card);--md-sys-color-surface-container:var(--card);','--md-sys-color-surface-container-high:var(--secondary);--md-sys-color-surface-container-highest:var(--secondary);','--md-sys-color-outline:var(--border);--md-sys-color-outline-variant:var(--border);',_0x3e1a45(0x24a),_0x3e1a45(0x2d8),_0x3e1a45(0x289),_0x3e1a45(0x2e5),_0x3e1a45(0x1f8),_0x3e1a45(0x12c),_0x3e1a45(0x13f),'--md-sys-elevation-2:0\x204px\x206px\x20-1px\x20rgb(0\x200\x200\x20/\x200.1),\x200\x202px\x204px\x20-2px\x20rgb(0\x200\x200\x20/\x200.1);',_0x3e1a45(0x1fb),_0x3e1a45(0x277),_0x3e1a45(0x16f),'--card:#ffffff;--card-foreground:#0f172a;',_0x3e1a45(0x11d),_0x3e1a45(0x102),_0x3e1a45(0x153),'--muted:#eef2f7;--muted-foreground:#64748b;','--accent:#eef2ff;--accent-foreground:#3730a3;',_0x3e1a45(0x24e),_0x3e1a45(0x25a),'--ceir-bg:#f8fafc;--ceir-surface:#ffffff;',_0x3e1a45(0xa7),'--ceir-accent:#4f46e5;--ceir-accent-hover:#4338ca;--ceir-accent-light:rgba(79,70,229,.1);',_0x3e1a45(0x157),_0x3e1a45(0x226),_0x3e1a45(0x26c),'--ceir-purple:#9333ea;--ceir-purple-bg:rgba(147,51,234,.08);','--ceir-row-hover:#f1f5f9;--ceir-sidebar-bg:#f1f5f9;',_0x3e1a45(0x24b),'--md-sys-color-primary:var(--primary);--md-sys-color-on-primary:var(--primary-foreground);',_0x3e1a45(0x2b2),_0x3e1a45(0x291),_0x3e1a45(0x34d),_0x3e1a45(0x13f),_0x3e1a45(0x247),'--md-sys-elevation-3:0\x2010px\x2015px\x20-3px\x20rgb(0\x200\x200\x20/\x200.1),\x200\x204px\x206px\x20-4px\x20rgb(0\x200\x200\x20/\x200.1)}',_0x3e1a45(0x2e2),_0x3e1a45(0x2d1),'.hero-tbl{width:100%;border-collapse:collapse;font-size:13px}',_0x3e1a45(0x215),_0x3e1a45(0x2b1),_0x3e1a45(0xac),_0x3e1a45(0xc3),_0x3e1a45(0x34c),'.ceir-layout-full{--ceir-w:94vw;--ceir-h:90vh;--ceir-header-h:56px;--ceir-sidebar-w:336px;--ceir-font-2xs:11px;--ceir-font-xs:12px;--ceir-font-sm:13px;--ceir-font-base:14px;--ceir-pad-xs:5px;--ceir-pad-sm:8px;--ceir-pad-md:12px;--ceir-pad-lg:18px;--ceir-pad-xl:20px;--ceir-gap:12px;--ceir-gap-sm:6px;--ceir-badge-pad:3px\x2010px;--ceir-badge-font:12px;--ceir-table-font:13.5px;--ceir-table-th:11.5px;--ceir-input-pad:12px\x2016px;--ceir-btn-pad:11px\x2024px;--ceir-radius-sm:6px;--ceir-radius:8px;--ceir-card-radius:12px}','.ceir-layout-anim,.ceir-layout-anim\x20*{transition:width\x20.3s\x20ease,height\x20.3s\x20ease,min-width\x20.3s\x20ease,padding\x20.3s\x20ease,margin\x20.3s\x20ease,gap\x20.3s\x20ease,font-size\x20.2s\x20ease!important}','#ceir-tool-container{font-family:var(--md-sys-typescale-font);background:var(--card);color:var(--card-foreground);border:1px\x20solid\x20var(--border);border-radius:calc(var(--radius)\x20+\x208px);box-shadow:0\x2024px\x2048px\x20-12px\x20rgb(0\x200\x200\x20/\x200.35)!important}',_0x3e1a45(0x150),_0x3e1a45(0x1a1),'[data-ceir-sidebar]{background:var(--sidebar-bg);border-right:1px\x20solid\x20var(--border)}',_0x3e1a45(0x1d0),_0x3e1a45(0x122),_0x3e1a45(0x30e),_0x3e1a45(0x2f8),'#ceir-turnstile-slot\x20iframe,#ceir-turnstile-slot\x20>\x20.cf-turnstile{zoom:1;flex:none;width:300px!important;height:65px!important;max-width:none!important;box-sizing:border-box}',_0x3e1a45(0x1d9),'#ceir-turnstile-slot\x20*{max-width:none!important;box-sizing:border-box}',_0x3e1a45(0x11f),_0x3e1a45(0x243),_0x3e1a45(0x228),_0x3e1a45(0x173),_0x3e1a45(0x30a),_0x3e1a45(0x21d),_0x3e1a45(0x1f3),_0x3e1a45(0x146),_0x3e1a45(0x2af),_0x3e1a45(0x2cc),_0x3e1a45(0x301),_0x3e1a45(0x2a3),'.ceir-input::placeholder{color:var(--muted-foreground)}','.ceir-input:hover{border-color:var(--muted-foreground)}',_0x3e1a45(0x101),_0x3e1a45(0x223),_0x3e1a45(0x149),_0x3e1a45(0x2eb),'.ceir-btn-primary:active{opacity:.85}',_0x3e1a45(0x114),_0x3e1a45(0x1f7),'.ceir-b{display:inline-flex;align-items:center;padding:var(--ceir-badge-pad);border-radius:var(--radius);font-size:var(--ceir-badge-font);font-weight:500;line-height:1.5;white-space:nowrap;background:var(--secondary);color:var(--secondary-foreground);border:1px\x20solid\x20transparent;letter-spacing:.01em}',_0x3e1a45(0x322),_0x3e1a45(0x18a),_0x3e1a45(0x1bf),_0x3e1a45(0x265),_0x3e1a45(0xd1),_0x3e1a45(0x207),_0x3e1a45(0x335),'.ceir-tgl\x20span::after{content:\x22\x22;position:absolute;width:16px;height:16px;left:4px;top:4px;background:var(--background);border-radius:50%;transition:transform\x20.2s;box-shadow:0\x201px\x203px\x20rgb(0\x200\x200\x20/\x200.2)}',_0x3e1a45(0x2a8),'.ceir-tgl\x20input:checked+span::after{transform:translateX(16px);background:var(--primary-foreground)}',_0x3e1a45(0x142),'.ceir-table{width:100%;border-collapse:collapse;font-size:var(--ceir-table-font)}','.ceir-table\x20th{padding:12px\x2014px;text-align:left;font-weight:500;color:var(--muted-foreground);font-size:var(--ceir-table-th);letter-spacing:.01em;background:var(--muted);border-bottom:1px\x20solid\x20var(--border);position:sticky;top:0;z-index:2}',_0x3e1a45(0x1df),'.ceir-table\x20tr:last-child\x20td{border-bottom:none}','.ceir-table\x20tbody\x20tr:hover\x20td{background:var(--accent)}',_0x3e1a45(0x256),_0x3e1a45(0x2d4),_0x3e1a45(0x34a),_0x3e1a45(0x100),_0x3e1a45(0x108),_0x3e1a45(0x22e),_0x3e1a45(0x342),_0x3e1a45(0x1c2),_0x3e1a45(0x211)]['join']('\x0a'),document[_0x3e1a45(0x317)][_0x3e1a45(0xbb)](_0x1558bc);var _0x2e313d='0x4AAAAAADmotCU2bSBwXlRk',_0x46adb2='0x4AAAAAADmoQuDsFEizt-Hn',_0x57eb81={'verify-imei':_0x2e313d,'device-data':_0x46adb2,'application':_0x46adb2,'applicant':_0x46adb2,'register-request':_0x46adb2,'check-unpaid':_0x46adb2,'same-device':_0x46adb2,'payment-hub':_0x46adb2,'payment-result':_0x46adb2,'update-applicant':_0x46adb2,'update-evidence':_0x46adb2};function _0x26d8aa(){var _0xbcfd6=_0x3e1a45;try{var _0x3e06bd=document[_0xbcfd6(0x139)](_0xbcfd6(0xea));if(_0x3e06bd&&_0x3e06bd[_0xbcfd6(0x2d2)][_0xbcfd6(0x187)](_0xbcfd6(0x310)))return!![];return localStorage[_0xbcfd6(0x119)](_0xbcfd6(0x21a))===_0xbcfd6(0x196);}catch(_0x58747c){return![];}}var _0x36fa3d=null,_0x5e3a68=null,_0x33b81c=![];function _0x5b7484(){var _0x5e4893=_0x3e1a45;if(_0x33b81c||!window[_0x5e4893(0x2aa)]||typeof window[_0x5e4893(0x2aa)][_0x5e4893(0x2ae)]!==_0x5e4893(0x2ec))return;var _0x40dbe6=document[_0x5e4893(0x139)]('ceir-turnstile-slot');if(!_0x40dbe6)return;_0x40dbe6['innerHTML']='',_0x40dbe6[_0x5e4893(0x1ef)][_0x5e4893(0x313)]=_0x5e4893(0x162),_0x40dbe6[_0x5e4893(0x1ef)][_0x5e4893(0x1d6)]='var(--ceir-border)',_0x40dbe6[_0x5e4893(0x1ef)][_0x5e4893(0x8d)]=_0x5e4893(0xf2);try{_0x36fa3d=window[_0x5e4893(0x2aa)][_0x5e4893(0x2ae)](_0x40dbe6,{'sitekey':_0x2e313d,'callback':function(_0x39ce09){_0x5e3a68=_0x39ce09,_0xb7f8ca();},'error-callback':function(_0x78a775){var _0x4fee6e=_0x5e4893;_0x40dbe6[_0x4fee6e(0x194)]='<span\x20style=\x22color:var(--ceir-red);font-size:11px;padding:8px\x22>Error:\x20'+_0x2fbf99(String(_0x78a775))+_0x4fee6e(0x15c),_0x33b81c=![];},'expired-callback':function(){_0x5e3a68=null,_0xb7f8ca();},'action':_0x5e4893(0x118),'theme':_0x26d8aa()?_0x5e4893(0x196):_0x5e4893(0x19a),'language':'en'}),_0x33b81c=!![];}catch(_0x527e89){_0x40dbe6['innerHTML']=_0x5e4893(0x206);}}function _0x1ef456(){var _0x3cf247=_0x3e1a45;_0x36fa3d&&window[_0x3cf247(0x2aa)]&&typeof window[_0x3cf247(0x2aa)][_0x3cf247(0x2b4)]===_0x3cf247(0x2ec)&&window['turnstile'][_0x3cf247(0x2b4)](_0x36fa3d),_0x5e3a68=null,_0xb9ce12=![],_0x6542ef(),_0xb7f8ca();}function _0xb7f8ca(){var _0x3ce71d=_0x3e1a45,_0x3b6271=document[_0x3ce71d(0x139)](_0x3ce71d(0x1af)),_0x55d287=document[_0x3ce71d(0x139)](_0x3ce71d(0x21c));if(!_0x3b6271){_0x5380ea();return;}if(_0x5e3a68){_0x3b6271[_0x3ce71d(0x194)]=_0x3ce71d(0x1bb),_0x3b6271[_0x3ce71d(0x1ef)]['background']=_0x3ce71d(0x23d),_0x3b6271['style'][_0x3ce71d(0x1d6)]=_0x3ce71d(0x177);if(_0x55d287)_0x55d287[_0x3ce71d(0x1ef)]['display']=_0x3ce71d(0x188);}else{_0x3b6271[_0x3ce71d(0x194)]='<span\x20style=\x22color:var(--ceir-amber);font-weight:600\x22>&#9679;\x20No\x20token</span>\x20<span\x20style=\x22color:var(--ceir-muted);font-size:10px\x22>—\x20click\x20verify</span>',_0x3b6271['style']['background']=_0x3ce71d(0x2ab),_0x3b6271[_0x3ce71d(0x1ef)][_0x3ce71d(0x1d6)]=_0x3ce71d(0x2db);if(_0x55d287)_0x55d287[_0x3ce71d(0x1ef)][_0x3ce71d(0x90)]=_0x3ce71d(0x2cf);}_0x5380ea();}var _0x58331c=![];function _0x5380ea(){var _0x989c8d=_0x3e1a45;if(!_0x1d77f3)return;if(_0x58331c){_0x1d77f3['disabled']=!![];return;}if(_0x4024db===_0x989c8d(0x32a)||_0x4024db===_0x989c8d(0xa2)){_0x1d77f3[_0x989c8d(0x1ee)]=![];return;}_0x1d77f3[_0x989c8d(0x1ee)]=!_0x890f8b();}function _0x2fbf99(_0x454320){var _0x4943d0=_0x3e1a45;return String(_0x454320===null||_0x454320===undefined?'':_0x454320)[_0x4943d0(0x14b)](/&/g,_0x4943d0(0x2a5))[_0x4943d0(0x14b)](/</g,_0x4943d0(0xc0))[_0x4943d0(0x14b)](/>/g,_0x4943d0(0xdb));}function _0x890f8b(){var _0x9ed4e4=_0x3e1a45;if(_0x5e3a68)return _0x5e3a68;try{if(window[_0x9ed4e4(0x2aa)]&&typeof window[_0x9ed4e4(0x2aa)]['getResponse']===_0x9ed4e4(0x2ec)){var _0x19b842=window[_0x9ed4e4(0x2aa)][_0x9ed4e4(0x236)](_0x36fa3d);if(_0x19b842)return _0x5e3a68=_0x19b842,_0x19b842;}}catch(_0x57d52f){}return null;}(function _0xadb578(){var _0x5e625e=_0x3e1a45;if(window[_0x5e625e(0x2aa)]&&typeof window['turnstile']['render']==='function')_0x5b7484();else!_0x33b81c&&setTimeout(_0xadb578,0x1f4);}());var _0x46bd81={},_0xf3e4b4=0x4*0x3c*0x3e8;function _0x4957e5(_0xb5fb9b){var _0x235a67=_0x3e1a45,_0x5a096f=_0x46bd81[_0xb5fb9b];if(_0x5a096f&&_0x5a096f[_0x235a67(0x2a9)]&&Date[_0x235a67(0x19b)]()-_0x5a096f['ts']<_0xf3e4b4)return _0x5a096f[_0x235a67(0x2a9)];return null;}function _0x39df70(_0x59e04e,_0x4502bf){var _0x4e98a1=_0x3e1a45;_0x46bd81[_0x59e04e]={'token':_0x4502bf,'ts':Date[_0x4e98a1(0x19b)]()};}function _0x5cad53(_0x4137a9){delete _0x46bd81[_0x4137a9];}function _0x6542ef(){_0x46bd81={};}var _0x35c81c=null,_0x518a52=![],_0x591bb3=null;function _0x28dcae(){var _0x5ea25e=_0x3e1a45;if(_0x35c81c!=null&&window[_0x5ea25e(0x2aa)]&&typeof window[_0x5ea25e(0x2aa)]['remove']===_0x5ea25e(0x2ec))try{window[_0x5ea25e(0x2aa)][_0x5ea25e(0x2b9)](_0x35c81c);}catch(_0x5b9ab0){}_0x35c81c=null;if(_0x591bb3){try{_0x591bb3[_0x5ea25e(0x2b9)]();}catch(_0x1dc19c){}_0x591bb3=null;}}var _0x4dd487={'device-data':0x1,'application':0x1,'applicant':0x1,'register-request':0x1};function _0x45ef03(_0x507c5d,_0x49d351){return _0x49d351=_0x49d351||0x7530,new Promise(function(_0x3837a7,_0x590d90){var _0xbdfbd3=a0_0x2691;if(!window[_0xbdfbd3(0x2aa)]||typeof window[_0xbdfbd3(0x2aa)]['render']!==_0xbdfbd3(0x2ec)){_0x590d90(new Error(_0xbdfbd3(0x26e)));return;}if(_0x518a52){_0x590d90(new Error(_0xbdfbd3(0xa3)));return;}var _0x1c2ac9=!!_0x4dd487[_0x507c5d];_0x518a52=!![],_0x28dcae();_0x1c2ac9&&typeof _0x224381!==_0xbdfbd3(0x28d)&&_0x224381&&(_0x224381[_0xbdfbd3(0x178)]=_0xbdfbd3(0x340)+_0x507c5d+'…');var _0x264a84=null,_0x31a20c=null,_0x573339=null;!_0x1c2ac9?(_0x264a84=document['createElement'](_0xbdfbd3(0xbd)),_0x264a84[_0xbdfbd3(0x1ef)][_0xbdfbd3(0x1fc)]='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);'+_0xbdfbd3(0x19f)+_0xbdfbd3(0x257)+_0xbdfbd3(0x183),_0x264a84[_0xbdfbd3(0x194)]=_0xbdfbd3(0x1d5)+_0xbdfbd3(0x15e)+_0x2fbf99(_0x507c5d)+_0xbdfbd3(0x131)+_0xbdfbd3(0x2e8)+'<div\x20class=\x22ceir-mint-status\x22\x20style=\x22font-size:10px;color:#888;margin-top:4px\x22>Complete\x20the\x20checkbox…</div>',document[_0xbdfbd3(0x30f)][_0xbdfbd3(0xbb)](_0x264a84),_0x591bb3=_0x264a84,_0x31a20c=_0x264a84['querySelector'](_0xbdfbd3(0x2bf)),_0x573339=_0x264a84['querySelector']('.ceir-mint-status')):(_0x264a84=document['createElement'](_0xbdfbd3(0xbd)),_0x264a84[_0xbdfbd3(0x1ef)][_0xbdfbd3(0x1fc)]=_0xbdfbd3(0x325)+_0xbdfbd3(0x216)+_0xbdfbd3(0x96),_0x264a84[_0xbdfbd3(0x194)]=_0xbdfbd3(0x2bb)+_0xbdfbd3(0x2e6),document[_0xbdfbd3(0x30f)][_0xbdfbd3(0xbb)](_0x264a84),_0x591bb3=_0x264a84,_0x31a20c=_0x264a84[_0xbdfbd3(0x1b5)]('.ceir-mint-slot'),_0x573339=_0x264a84[_0xbdfbd3(0x1b5)](_0xbdfbd3(0x1de)),setTimeout(function(){var _0x47c740=_0xbdfbd3;if(!_0x5082ba&&_0x264a84){_0x264a84[_0x47c740(0x1ef)][_0x47c740(0x1fc)]=_0x47c740(0x2f9)+_0x47c740(0x19f)+'padding:10px\x2014px;box-shadow:0\x2012px\x2040px\x20rgba(0,0,0,.18);'+_0x47c740(0x18f);if(_0x224381)_0x224381['innerText']=_0x47c740(0x2a0)+_0x507c5d;}},0x1770));var _0xe46ee8=_0x57eb81[_0x507c5d]||_0x46adb2,_0x57ced7=_0xe46ee8===_0x2e313d?_0xbdfbd3(0x120):_0xbdfbd3(0x29f),_0x5082ba=![],_0x230ffd=setTimeout(function(){var _0x11744=_0xbdfbd3;if(_0x5082ba)return;_0x5082ba=!![],_0x518a52=![],_0x28dcae();if(_0x224381)_0x224381[_0x11744(0x178)]='';_0x590d90(new Error(_0x11744(0x1e9)+_0x507c5d));},_0x49d351);function _0x32b7d2(_0x56ddfc){var _0x3ac624=_0xbdfbd3;if(_0x5082ba)return;_0x5082ba=!![],clearTimeout(_0x230ffd),_0x518a52=![],_0x573339&&(_0x573339[_0x3ac624(0x103)]=_0x56ddfc?_0x3ac624(0x344):'failed',_0x573339[_0x3ac624(0x1ef)][_0x3ac624(0xcc)]=_0x56ddfc?_0x3ac624(0x14d):_0x3ac624(0x1b9)),setTimeout(function(){_0x28dcae();},_0x56ddfc?0x15e:0x320),_0x56ddfc?(_0x39df70(_0x507c5d,_0x56ddfc),_0x3837a7(_0x56ddfc)):_0x590d90(new Error(_0x3ac624(0x1d2)+_0x507c5d));}try{_0x35c81c=window['turnstile'][_0xbdfbd3(0x2ae)](_0x31a20c,{'sitekey':_0xe46ee8,'action':_0x507c5d,'appearance':_0x57ced7,'execution':_0xbdfbd3(0x32f),'theme':_0x26d8aa()?_0xbdfbd3(0x196):_0xbdfbd3(0x19a),'language':'en','callback':function(_0x41fbd6){_0x32b7d2(_0x41fbd6);},'error-callback':function(_0x856ca7){var _0x4666e0=_0xbdfbd3;console['warn'](_0x4666e0(0xbc),_0x507c5d,_0x856ca7),_0x32b7d2(null);},'expired-callback':function(){_0x32b7d2(null);}});if(_0x57ced7===_0xbdfbd3(0x29f)&&_0x35c81c!=null&&window[_0xbdfbd3(0x2aa)][_0xbdfbd3(0x32f)])try{window[_0xbdfbd3(0x2aa)][_0xbdfbd3(0x32f)](_0x35c81c);}catch(_0x5283af){}}catch(_0x505228){console[_0xbdfbd3(0x308)](_0xbdfbd3(0x28b),_0x507c5d,_0x505228),_0x32b7d2(null);}});}var _0xb9ce12=![];function _0x1e323b(){var _0x90c56b=_0x3e1a45,_0x357c7a=_0x890f8b();if(_0x357c7a)return _0xb9ce12=!![],Promise[_0x90c56b(0xc5)](_0x357c7a);return Promise[_0x90c56b(0x1c5)](new Error(_0x90c56b(0x145)+(_0xb9ce12?_0x90c56b(0x297):'.')));}function _0x30ecca(_0x142bac){var _0x56fc36=_0x3e1a45;if(_0x142bac===_0x56fc36(0x118))return _0x1e323b();var _0xa01004=_0x4957e5(_0x142bac);if(_0xa01004)return Promise[_0x56fc36(0xc5)](_0xa01004);return _0x45ef03(_0x142bac,0x7530);}function _0x37b889(){if(_0x518a52)_0x518a52=![];_0x28dcae();}window['copyText']=function(_0x105c60){var _0x2d754a=_0x3e1a45,_0x18e1d4=document[_0x2d754a(0x139)](_0x105c60);if(!_0x18e1d4)return;var _0x2424b6=_0x18e1d4[_0x2d754a(0x103)]||_0x18e1d4[_0x2d754a(0x178)];if(navigator[_0x2d754a(0x2dc)]&&navigator[_0x2d754a(0x2dc)]['writeText'])navigator['clipboard'][_0x2d754a(0x1a3)](_0x2424b6)[_0x2d754a(0x1c0)](function(){var _0x7aab78=_0x2d754a;document[_0x7aab78(0x9b)](_0x7aab78(0x11a)+_0x105c60+_0x7aab78(0x29d))[_0x7aab78(0x1c7)](function(_0x37abb0){var _0x11c33c=_0x7aab78,_0x58ac1d=_0x37abb0['textContent'];_0x37abb0[_0x11c33c(0x103)]=_0x11c33c(0x2c8),_0x37abb0[_0x11c33c(0x1ef)][_0x11c33c(0xcc)]=_0x11c33c(0x177),setTimeout(function(){var _0x4f6924=_0x11c33c;_0x37abb0[_0x4f6924(0x103)]=_0x58ac1d,_0x37abb0['style'][_0x4f6924(0xcc)]='';},0x5dc);});});else{var _0x7533e8=document['createElement']('textarea');_0x7533e8['value']=_0x2424b6,_0x7533e8[_0x2d754a(0x1ef)][_0x2d754a(0x1fc)]=_0x2d754a(0x33d),document[_0x2d754a(0x30f)][_0x2d754a(0xbb)](_0x7533e8),_0x7533e8[_0x2d754a(0x1a4)](),document[_0x2d754a(0x2a1)]('copy'),document[_0x2d754a(0x30f)][_0x2d754a(0x25c)](_0x7533e8),document[_0x2d754a(0x9b)](_0x2d754a(0x11a)+_0x105c60+_0x2d754a(0x29d))['forEach'](function(_0x164dbc){var _0x1ece47=_0x2d754a,_0x1173e7=_0x164dbc['textContent'];_0x164dbc['textContent']='Copied!',_0x164dbc[_0x1ece47(0x1ef)][_0x1ece47(0xcc)]=_0x1ece47(0x177),setTimeout(function(){var _0x492ae9=_0x1ece47;_0x164dbc[_0x492ae9(0x103)]=_0x1173e7,_0x164dbc[_0x492ae9(0x1ef)][_0x492ae9(0xcc)]='';},0x5dc);});}};var _0x34c658=document['createElement'](_0x3e1a45(0xbd));_0x34c658['id']=_0x3e1a45(0x201),_0x34c658['style'][_0x3e1a45(0x1fc)]=_0x3e1a45(0x12f),document[_0x3e1a45(0x30f)][_0x3e1a45(0xbb)](_0x34c658);var _0x1555fd=document[_0x3e1a45(0x2c2)]('button');_0x1555fd['id']=_0x3e1a45(0x17e),_0x1555fd[_0x3e1a45(0x1ef)][_0x3e1a45(0x1fc)]=_0x3e1a45(0x172),_0x1555fd[_0x3e1a45(0xd3)]=function(){var _0x4c3253=_0x3e1a45;this[_0x4c3253(0x1ef)][_0x4c3253(0x214)]='.9',this[_0x4c3253(0x1ef)]['boxShadow']=_0x4c3253(0x10e);},_0x1555fd[_0x3e1a45(0x1ec)]=function(){var _0x51c97d=_0x3e1a45;this[_0x51c97d(0x1ef)][_0x51c97d(0x214)]='',this['style'][_0x51c97d(0x1e6)]=_0x51c97d(0x307);},_0x1555fd[_0x3e1a45(0x194)]=_0x3e1a45(0x1ac),document[_0x3e1a45(0x30f)][_0x3e1a45(0xbb)](_0x1555fd);var _0x1f2023=document[_0x3e1a45(0x2c2)](_0x3e1a45(0xbd));_0x1f2023['id']=_0x3e1a45(0xea),_0x1f2023[_0x3e1a45(0x294)]=_0x3e1a45(0x22f),_0x1f2023['style'][_0x3e1a45(0x1fc)]=_0x3e1a45(0x1a6),_0x1f2023[_0x3e1a45(0x194)]=_0x3e1a45(0x324),document[_0x3e1a45(0x30f)]['appendChild'](_0x1f2023);var _0x4024db=_0x3e1a45(0x286),_0x17efda=![],_0x486e85=null,_0x41c47f=null,_0xc0f73f=null,_0xccfa
+(function () {
+  'use strict';
+
+  if (window.__ceirReadOnlyChecker) {
+    return;
+  }
+  window.__ceirReadOnlyChecker = true;
+
+  const BASE = 'https://ceir.gov.mm/openapi/API';
+  const PANEL_ID = 'ceir-read-only-checker';
+
+  const styles = `
+    #${PANEL_ID} {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2147483647;
+      width: min(360px, calc(100vw - 32px));
+      color: #18212f;
+      background: #ffffff;
+      border: 1px solid #d5dae3;
+      border-radius: 14px;
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.24);
+      font: 13px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+    #${PANEL_ID} * {
+      box-sizing: border-box;
+    }
+    #${PANEL_ID} .checker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #101828;
+      color: #ffffff;
+    }
+    #${PANEL_ID} .checker-title {
+      min-width: 0;
+      font-weight: 700;
+    }
+    #${PANEL_ID} button {
+      appearance: none;
+      min-height: 34px;
+      padding: 7px 10px;
+      border: 1px solid #cbd2dc;
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #18212f;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+    }
+    #${PANEL_ID} button:hover {
+      background: #eef2f7;
+    }
+    #${PANEL_ID} button:focus-visible,
+    #${PANEL_ID} input:focus-visible {
+      outline: 3px solid rgba(37, 99, 235, 0.28);
+      outline-offset: 1px;
+    }
+    #${PANEL_ID} button:disabled {
+      cursor: wait;
+      opacity: 0.6;
+    }
+    #${PANEL_ID} .checker-header button {
+      min-height: 28px;
+      padding: 4px 9px;
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+    #${PANEL_ID} .checker-body {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+    }
+    #${PANEL_ID} label {
+      display: grid;
+      gap: 5px;
+      color: #465066;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    #${PANEL_ID} input {
+      width: 100%;
+      min-height: 36px;
+      padding: 8px 10px;
+      border: 1px solid #cbd2dc;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #18212f;
+      font: 13px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    #${PANEL_ID} .checker-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    #${PANEL_ID} .checker-primary {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #ffffff;
+    }
+    #${PANEL_ID} .checker-primary:hover {
+      background: #1e40af;
+    }
+    #${PANEL_ID} .checker-note {
+      margin: 0;
+      color: #667085;
+      font-size: 11px;
+    }
+    #${PANEL_ID} .checker-message {
+      min-height: 108px;
+      max-height: 260px;
+      margin: 0;
+      padding: 10px;
+      overflow: auto;
+      border: 1px solid #e1e6ed;
+      border-radius: 8px;
+      background: #f5f7fa;
+      color: #27364a;
+      font: 11px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    #${PANEL_ID}.checker-collapsed .checker-body {
+      display: none;
+    }
+  `;
+
+  const panel = document.createElement('section');
+  panel.id = PANEL_ID;
+  panel.setAttribute('aria-label', 'CEIR read-only checker');
+  panel.innerHTML = `
+    <style>${styles}</style>
+    <header class="checker-header">
+      <span class="checker-title">CEIR Read-Only Checker</span>
+      <button type="button" data-action="toggle" aria-expanded="true">Hide</button>
+    </header>
+    <div class="checker-body">
+      <label>
+        altchaData (manual)
+        <input id="checker-token" type="text" autocomplete="off" spellcheck="false"
+          placeholder="Paste token from an official CEIR request">
+      </label>
+      <label>
+        IMEI (15 digits)
+        <input id="checker-imei" type="text" inputmode="numeric" autocomplete="off"
+          maxlength="15" placeholder="e.g. 490154203237518">
+      </label>
+      <label>
+        Declaration ID or declaration hash
+        <input id="checker-reference" type="text" autocomplete="off" spellcheck="false"
+          placeholder="Required for status/applicant">
+      </label>
+      <div class="checker-actions">
+        <button type="button" class="checker-primary" data-endpoint="verify">Verify IMEI</button>
+        <button type="button" data-endpoint="device">Device info</button>
+        <button type="button" data-endpoint="status">Registration status</button>
+        <button type="button" data-endpoint="applicant">Applicant</button>
+      </div>
+      <p class="checker-note">
+        Activation-free: this script stores no license key, fingerprint, token or query result.
+        Solve CEIR verification on the official page and copy a fresh altchaData manually.
+      </p>
+      <pre class="checker-message" role="status" aria-live="polite">Ready.</pre>
+    </div>
+  `;
+  document.body.appendChild(panel);
+
+  const tokenInput = panel.querySelector('#checker-token');
+  const imeiInput = panel.querySelector('#checker-imei');
+  const referenceInput = panel.querySelector('#checker-reference');
+  const messageOutput = panel.querySelector('.checker-message');
+  const buttons = Array.from(panel.querySelectorAll('button[data-endpoint]'));
+  const toggleButton = panel.querySelector('[data-action="toggle"]');
+
+  function writeMessage(message) {
+    messageOutput.textContent = typeof message === 'string'
+      ? message
+      : JSON.stringify(message, null, 2);
+    messageOutput.scrollTop = 0;
+  }
+
+  function requireToken() {
+    const token = tokenInput.value.trim();
+    if (!token) {
+      writeMessage('altchaData is required. Copy it from an official CEIR network request.');
+      tokenInput.focus();
+      return null;
+    }
+    return token;
+  }
+
+  function requireImei() {
+    const imei = imeiInput.value.trim();
+    if (!/^\d{15}$/.test(imei)) {
+      writeMessage('IMEI must contain exactly 15 digits.');
+      imeiInput.focus();
+      return null;
+    }
+    return imei;
+  }
+
+  function requireReference(label) {
+    const value = referenceInput.value.trim();
+    if (!value) {
+      writeMessage(`${label} is required.`);
+      referenceInput.focus();
+      return null;
+    }
+    return value;
+  }
+
+  async function request(url, options) {
+    const buttonsEnabled = buttons.map((button) => !button.disabled);
+    buttons.forEach((button) => {
+      button.disabled = true;
+    });
+    writeMessage('Requesting CEIR API...');
+
+    try {
+      const response = await fetch(url, options);
+      const text = await response.text();
+
+      if (!response.ok) {
+        const hint = response.status === 403
+          ? '\nToken may be rejected or Cloudflare may have blocked the request. Copy a fresh altchaData from an official CEIR request.'
+          : '';
+        writeMessage(`HTTP ${response.status} ${response.statusText}${hint}\n\n${text.slice(0, 2000)}`);
+        return;
+      }
+
+      try {
+        writeMessage(JSON.parse(text));
+      } catch {
+        writeMessage(text.slice(0, 8000) || 'Empty response.');
+      }
+    } catch (error) {
+      writeMessage(`Network error: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      buttons.forEach((button, index) => {
+        button.disabled = buttonsEnabled[index];
+      });
+    }
+  }
+
+  function getJsonHeaders() {
+    return {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    };
+  }
+
+  toggleButton.addEventListener('click', () => {
+    const collapsed = panel.classList.toggle('checker-collapsed');
+    toggleButton.textContent = collapsed ? 'Show' : 'Hide';
+    toggleButton.setAttribute('aria-expanded', String(!collapsed));
+  });
+
+  imeiInput.addEventListener('input', () => {
+    imeiInput.value = imeiInput.value.replace(/\D/g, '').slice(0, 15);
+  });
+
+  panel.querySelector('[data-endpoint="verify"]').addEventListener('click', () => {
+    const token = requireToken();
+    const imei = requireImei();
+    if (!token || !imei) {
+      return;
+    }
+    const url = `${BASE}/IMEI/Verify?altchaData=${encodeURIComponent(token)}`;
+    request(url, {
+      method: 'POST',
+      headers: getJsonHeaders(),
+      body: JSON.stringify({ imeis: [imei] })
+    });
+  });
+
+  panel.querySelector('[data-endpoint="device"]').addEventListener('click', () => {
+    const token = requireToken();
+    const imei = requireImei();
+    if (!token || !imei) {
+      return;
+    }
+    const query = new URLSearchParams({
+      altchaData: token,
+      imei
+    });
+    request(`${BASE}/Device/personal-device-info?${query}`, { headers: { Accept: 'application/json' } });
+  });
+
+  panel.querySelector('[data-endpoint="status"]').addEventListener('click', () => {
+    const token = requireToken();
+    const reference = requireReference('Declaration ID');
+    if (!token || !reference) {
+      return;
+    }
+    const query = new URLSearchParams({
+      DeclarationID: reference,
+      altchaData: token
+    });
+    request(`${BASE}/IMEI/RegistrationStatus?${query}`, { headers: { Accept: 'application/json' } });
+  });
+
+  panel.querySelector('[data-endpoint="applicant"]').addEventListener('click', () => {
+    const token = requireToken();
+    const reference = requireReference('Declaration hash');
+    if (!token || !reference) {
+      return;
+    }
+    const query = new URLSearchParams({
+      altchaData: token,
+      declarationHash: reference
+    });
+    request(`${BASE}/request/applicant?${query}`, { headers: { Accept: 'application/json' } });
+  });
+})();

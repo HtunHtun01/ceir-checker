@@ -34,8 +34,8 @@
     'update-evidence': '0x4AAAAAADmoQuDsFEizt-Hn'
   };
 
-  const TOKEN_TTL = 4 * 60 * 1000;   // 4 min
-  const MINT_TIMEOUT = 30 * 1000;    // 30 sec
+  const TOKEN_TTL = 4 * 60 * 1000;
+  const MINT_TIMEOUT = 30 * 1000;
 
   // ============================================================
   // STYLES
@@ -244,7 +244,6 @@
       word-break: break-word;
     }
 
-    /* Dark mode */
     @media (prefers-color-scheme: dark) {
       #${PANEL_ID} {
         background: #131a2e;
@@ -631,7 +630,6 @@
   });
 
   tokenInput.addEventListener('input', () => {
-    // Manual edit — reset indicator
     updateTokenFieldUI('');
     if (cachedToken !== tokenInput.value.trim()) {
       clearTokenState();
@@ -640,4 +638,98 @@
 
   // ============================================================
   // MINT TOKEN
-  // ===================================
+  // ============================================================
+  mintButton.addEventListener('click', async () => {
+    if (minting) return;
+    minting = true;
+    mintButton.disabled = true;
+    setStatus('', 'Minting');
+    setTokenStatus('', '…');
+    writeMessage('Minting fresh token via Cloudflare Turnstile...\n\nIf a checkbox appears, click it to continue.');
+
+    try {
+      const token = await getToken('verify-imei');
+      tokenInput.value = token;
+      updateTokenFieldUI('ready');
+      startExpiryCountdown(tokenExpiry);
+      setStatus('ready', 'Token ready');
+      writeMessage(
+        'Token ready (expires in 4 min)\n\n' +
+        'Action:   verify-imei\n' +
+        'Length:   ' + token.length + ' chars\n' +
+        'Preview:  ' + token.slice(0, 80) + '...'
+      );
+    } catch (error) {
+      updateTokenFieldUI('error');
+      setStatus('error', 'Mint failed');
+      writeMessage(
+        'Token mint failed.\n\n' +
+        (error instanceof Error ? error.message : String(error)) + '\n\n' +
+        'Fallback: Open the official CEIR page, solve Turnstile manually, ' +
+        'then copy altchaData from Network tab (F12 → Network → filter "altchaData").'
+      );
+    } finally {
+      minting = false;
+      mintButton.disabled = false;
+    }
+  });
+
+  clearButton.addEventListener('click', () => {
+    clearTokenState();
+    tokenInput.value = '';
+    updateTokenFieldUI('');
+    setStatus('', 'Idle');
+    writeMessage('Token cleared.');
+  });
+
+  // ============================================================
+  // API ACTIONS
+  // ============================================================
+  panel.querySelector('[data-endpoint="verify"]').addEventListener('click', () => {
+    const token = requireToken();
+    const imei = requireImei();
+    if (!token || !imei) return;
+    const url = `${BASE}/IMEI/Verify?altchaData=${encodeURIComponent(token)}`;
+    request(url, {
+      method: 'POST',
+      headers: getJsonHeaders(),
+      body: JSON.stringify({ imeis: [imei] })
+    });
+  });
+
+  panel.querySelector('[data-endpoint="device"]').addEventListener('click', () => {
+    const token = requireToken();
+    const imei = requireImei();
+    if (!token || !imei) return;
+    const query = new URLSearchParams({ altchaData: token, imei });
+    request(`${BASE}/Device/personal-device-info?${query}`, {
+      headers: { Accept: 'application/json' }
+    });
+  });
+
+  panel.querySelector('[data-endpoint="status"]').addEventListener('click', () => {
+    const token = requireToken();
+    const reference = requireReference('Declaration ID');
+    if (!token || !reference) return;
+    const query = new URLSearchParams({ DeclarationID: reference, altchaData: token });
+    request(`${BASE}/IMEI/RegistrationStatus?${query}`, {
+      headers: { Accept: 'application/json' }
+    });
+  });
+
+  panel.querySelector('[data-endpoint="applicant"]').addEventListener('click', () => {
+    const token = requireToken();
+    const reference = requireReference('Declaration hash');
+    if (!token || !reference) return;
+    const query = new URLSearchParams({ altchaData: token, declarationHash: reference });
+    request(`${BASE}/request/applicant?${query}`, {
+      headers: { Accept: 'application/json' }
+    });
+  });
+
+  // ============================================================
+  // READY
+  // ============================================================
+  setStatus('', 'Idle');
+  updateTokenFieldUI('');
+})();

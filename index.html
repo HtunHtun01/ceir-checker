@@ -1,48 +1,164 @@
 <!doctype html>
 <html lang="my">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CEIR Checker (HTML Mirror)</title>
-<style>
-body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.7;color:#111}
-.card{border:1px solid #e5e5e5;border-radius:12px;padding:20px;margin:16px 0}
-code{background:#f5f5f5;padding:2px 6px;border-radius:6px}
-pre{background:#0b1020;color:#e7ecf5;padding:16px;border-radius:12px;overflow:auto}
-a{color:#4f46e5}
-.warn{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:12px 16px}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Activation-free, read-only CEIR Tampermonkey helper">
+  <title>CEIR Read-Only Checker</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18212f;
+      --muted: #667085;
+      --line: #d9dee7;
+      --paper: #ffffff;
+      --blue: #1d4ed8;
+      --navy: #101828;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #f5f7fa;
+      font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    header {
+      padding: 64px 20px;
+      text-align: center;
+      background:
+        radial-gradient(circle at 20% 0, rgba(29, 78, 216, 0.2), transparent 42%),
+        var(--navy);
+      color: #ffffff;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+    }
+    header p {
+      max-width: 680px;
+      margin: 0 auto;
+      color: #cbd5e1;
+    }
+    main {
+      width: min(900px, calc(100% - 32px));
+      margin: -34px auto 56px;
+      display: grid;
+      gap: 18px;
+    }
+    section {
+      padding: clamp(22px, 5vw, 38px);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 18px 50px rgba(16, 24, 40, 0.08);
+    }
+    h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.25rem, 3vw, 1.65rem);
+      line-height: 1.3;
+    }
+    p {
+      margin: 10px 0;
+      color: var(--muted);
+    }
+    a {
+      color: var(--blue);
+      font-weight: 700;
+    }
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #eef2f7;
+      color: #344054;
+      font-size: 0.9em;
+    }
+    ol,
+    ul {
+      margin: 14px 0;
+      padding-left: 24px;
+    }
+    li {
+      margin: 7px 0;
+    }
+    .notice {
+      border-left: 5px solid var(--blue);
+      background: #eff6ff;
+      color: #1e3a8a;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .feature {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fafbfc;
+    }
+    .feature strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+    footer {
+      padding: 0 20px 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-<h1>CEIR Checker — GitHub HTML Mirror</h1>
-<p>Original: Windows <code>CeirChecker.exe</code> (Go + WebView2) → injects Tampermonkey script into <code>https://ceir.gov.mm/*</code>.</p>
-<div class="warn"><b>Important:</b> This Pages site is only docs + installer. The tool itself must run <b>on ceir.gov.mm via Tampermonkey</b>. Direct API calls from <code>github.io</code> will fail CORS / Turnstile domain check.</div>
-<div class="card">
-<h2>1. Install (recommended)</h2>
-<ol>
-<li>Install Tampermonkey extension.</li>
-<li>Open <code>ceir-checker.user.js</code> in this repo → Tampermonkey → Create new script → paste → Save.</li>
-<li>Go to <code>https://ceir.gov.mm/</code> → solve Turnstile checkbox → panel appears.</li>
-</ol>
-</div>
-<div class="card">
-<h2>2. Why not pure static HTML?</h2>
-<ul>
-<li>Turnstile sitekeys are bound to <code>ceir.gov.mm</code>.</li>
-<li>Browser controls <code>Origin</code> header — cannot spoof to <code>ceir.gov.mm</code> from <code>github.io</code>.</li>
-<li>Cloudflare 403 needs background-page verification on the real domain.</li>
-<li>License server (<code>workers.dev/api/auth/login|verify</code>) still requires key + fingerprint.</li>
-</ul>
-<p>To make full Pages app you need your own Turnstile keys + a backend proxy (e.g. Cloudflare Worker forwarding to <code>ceir.gov.mm/openapi/...</code>). That is out of scope for this mirror.</p>
-</div>
-<div class="card">
-<h2>3. Repo layout</h2>
-<pre>ceir-checker.user.js  # Tampermonkey build (runs on ceir.gov.mm)
-index.html            # this page (GitHub Pages)
-README.md             # usage + API notes
-docs/API.md           # 5 endpoints + auth flow
-.nojekyll             # pages helper</pre>
-</div>
-<p>Analysis source: <code>../ceir_analysis/userscript.deob.js</code> (local only, not published).</p>
+  <header>
+    <h1>CEIR Read-Only Checker</h1>
+    <p>License activation မပါဘဲ၊ manual <code>altchaData</code> ဖြင့် ဖတ်ရှုနိုင်သော
+      Tampermonkey helper</p>
+  </header>
+  <main>
+    <section class="notice">
+      <h2>Activation-free version</h2>
+      <p>ဒီ repo ထဲတွင် license key, fingerprint, third-party auth worker, token cache,
+        auto-retry သို့မဟုတ် captcha bypass မပါဝင်ပါ။ Script သည် read-only
+        endpoint ၄ခုကို မူရင်း CEIR origin တွင်သာ ခေါ်သည်။</p>
+    </section>
+
+    <section>
+      <h2>Install</h2>
+      <ol>
+        <li><a href="https://www.tampermonkey.net/">Tampermonkey</a> ကို install ပါ။</li>
+        <li><a href="./ceir-checker.user.js"><code>ceir-checker.user.js</code></a>
+          ကိုဖွင့်ပြီး install ပါ။</li>
+        <li><code>https://ceir.gov.mm/</code> တွင် verification ပြီးအောင်လုပ်ပါ။</li>
+        <li>DevTools → Network မှ official CEIR request ၏
+          <code>altchaData</code> ကိုကူးပြီး panel ထဲထည့်ပါ။</li>
+      </ol>
+      <p>Token ကို script က မသိမ်းပါ၊ refresh မလုပ်ပါ၊ ပြန်ပို့ပြီး redirect မလုပ်ပါ။</p>
+    </section>
+
+    <section>
+      <h2>Supported actions</h2>
+      <div class="grid">
+        <div class="feature"><strong>Verify IMEI</strong><code>IMEI/Verify</code></div>
+        <div class="feature"><strong>Device information</strong><code>personal-device-info</code></div>
+        <div class="feature"><strong>Registration status</strong><code>RegistrationStatus</code></div>
+        <div class="feature"><strong>Applicant information</strong><code>request/applicant</code></div>
+      </div>
+      <p>Registration နှင့် payment actions မပါဝင်ပါ။</p>
+    </section>
+
+    <section>
+      <h2>Pages limitation</h2>
+      <p>ဤ site သည် docs/installer သာဖြစ်သည်။ <code>github.io</code> မှ
+        <code>ceir.gov.mm</code> API ကို direct fetch လုပ်လျှင် CORS နှင့်
+        verification domain rules ကြောင့် အလုပ်မလုပ်ပါ။ Userscript ကို
+        CEIR စာမျက်နှာပေါ်တွင်သာ run ပါ။</p>
+    </section>
+  </main>
+  <footer>Independent project · not affiliated with CEIR · use responsibly</footer>
 </body>
 </html>

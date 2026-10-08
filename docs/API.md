@@ -1,35 +1,58 @@
-# API Notes (from static analysis)
+# CEIR Read-Only API Reference
 
-Base CEIR: `https://ceir.gov.mm`
-Auth mirror: `https://ceir-auth.goldfish63.workers.dev`
+Base URL: `https://ceir.gov.mm/openapi/API`
 
-## Auth (workers.dev)
+These notes describe only the independently implemented read-only operations. This
+project does not include an activation/auth API, fingerprinting, token minting, token
+caching, automatic retry, registration, or payment requests.
 
-- `POST /api/auth/login` — `{licenseKey, fingerprint, scriptVersion: "6.5", ts}`
-- `POST /api/auth/verify` — `{token, fingerprint, ts}`
-- Storage: `localStorage[_ct3]` = token, `localStorage[_cf3]` = `FP-...`
-- Fingerprint: screen, colorDepth, language, platform, hardwareConcurrency, maxTouchPoints, timeZone, timezoneOffset, canvas `FP_v3`, WebGL vendor/renderer, plugins.length → hash.
+## Requests
 
-## CEIR openapi (must run on ceir.gov.mm origin)
+### Verify IMEI
 
-All need `altchaData` (Turnstile/Altcha mint, 4-min cache except `verify-imei` which is always fresh):
+```http
+POST /openapi/API/IMEI/Verify?altchaData=TOKEN
+Accept: application/json
+Content-Type: application/json
 
-- `POST /openapi/API/IMEI/Verify?altchaData=` — JSON body
-- `GET /openapi/API/Device/personal-device-info?altchaData=&imei=`
-- `GET /openapi/API/IMEI/RegistrationStatus?DeclarationID=&altchaData=`
-- `GET /openapi/API/request/applicant?altchaData=&declarationHash=`
-- `POST /openapi/API/IMEI/RegistrationRequest?source=LEGAL_INDIVIDUAL&altchaData=` — JSON body
+{"imeis":["15-digit-imei"]}
+```
 
-Headers used by script:
+### Device information
 
-- `Content-Type: application/json`, `Accept: application/json`
-- `Origin: https://ceir.gov.mm`, `Referer: https://ceir.gov.mm/`
+```http
+GET /openapi/API/Device/personal-device-info?altchaData=TOKEN&imei=15-digit-imei
+Accept: application/json
+```
 
-Response wrapper: `{status, data}` or `{status: 403, isCloudflare: true}` on CF block / HTML block page. Token-invalid strings (`altcha/captcha/token/forbidden/unauthorized`) trigger cache clear + re-mint.
+### Registration status
 
-## ENC file
+```http
+GET /openapi/API/IMEI/RegistrationStatus?DeclarationID=VALUE&altchaData=TOKEN
+Accept: application/json
+```
 
-- Prefix `CEIR_ENC_V1:` + base64; `AES-GCM + PBKDF2(SHA-256, 100k)`.
-- JSON inside: `{applicant: {fullName, taxpayerType, nationalId, phone}}`.
-- Key is embedded in client — treat ENC as obfuscation, not secure storage.
-  
+### Applicant information
+
+```http
+GET /openapi/API/request/applicant?altchaData=TOKEN&declarationHash=VALUE
+Accept: application/json
+```
+
+## Token Handling
+
+- Copy a fresh `altchaData` value from an official request in CEIR's Network panel.
+- Keep it only in the in-memory form field.
+- Do not log, persist, share, or commit captured tokens.
+- If the server returns an HTTP 400/401/403 response, obtain a fresh value manually.
+- The script does not automatically replace or retry rejected tokens.
+
+## Origin Constraint
+
+Run the userscript on `https://ceir.gov.mm/*`. Calling these endpoints from another
+origin will generally fail CORS and CEIR verification checks.
+
+## Usage Limits
+
+Send only authorized, read-only requests. Do not automate bulk enumeration, repeat
+requests in loops, evade rate limits, or store returned personal information.

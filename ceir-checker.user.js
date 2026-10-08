@@ -1,257 +1,192 @@
 // ==UserScript==
-// @name         MIMI CEIR CHECKER 8.4 (Part 2: Fixed API & Parser)
+// @name         MIMI CEIR CHECKER (Scroll & Button Fixed)
 // @namespace    https://github.com/HtunHtun01/ceir-checker
-// @version      8.4.3
-// @description  Exact API payload match for CEIR official portal
+// @version      8.4.4
+// @description  Full Visible Button and Responsive Scroll Fix
 // @match        https://ceir.gov.mm/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
 
-const TURNSTILE_DEFAULT = '0x4AAAAAADmotCU2bSBwXlRk';
+(function () {
+  'use strict';
 
-const singleTab = document.querySelector('#btn-single-tab');
-const batchTab = document.querySelector('#btn-batch-tab');
-const appidTab = document.querySelector('#btn-appid-tab');
-const paytaxTab = document.querySelector('#btn-paytax-tab');
+  const TURNSTILE_DEFAULT = '0x4AAAAAADmotCU2bSBwXlRk';
 
-const singleWrap = document.querySelector('#single-input-wrapper');
-const batchWrap = document.querySelector('#batch-input-wrapper');
-const appidWrap = document.querySelector('#appid-input-wrapper');
-const paytaxWrap = document.querySelector('#paytax-input-wrapper');
-
-const imeiSingle = document.querySelector('#imei-single-input');
-const imeiBatch = document.querySelector('#imei-batch-input');
-const appidInput = document.querySelector('#appid-input');
-const btnRun = document.querySelector('#btn-check-start');
-const statusEl = document.querySelector('#tool-status');
-const resultsEl = document.querySelector('#tool-results');
-const turnstileSlot = document.querySelector('#ceir-turnstile-slot');
-const turnstileStatus = document.querySelector('#ceir-turnstile-status');
-const turnstileResetBtn = document.querySelector('#ceir-turnstile-reset');
-
-let activeTab = 'single';
-let turnstileToken = null;
-let turnstileWidgetId = null;
-
-function switchTab(tab) {
-  activeTab = tab;
-  [singleTab, batchTab, appidTab, paytaxTab].forEach((b) => {
-    b.style.background = 'transparent';
-    b.style.color = 'var(--muted-foreground)';
-  });
-  singleWrap.style.display = 'none';
-  batchWrap.style.display = 'none';
-  appidWrap.style.display = 'none';
-  paytaxWrap.style.display = 'none';
-
-  if (tab === 'single') {
-    singleTab.style.background = 'var(--ceir-surface)';
-    singleTab.style.color = 'var(--ceir-accent)';
-    singleWrap.style.display = 'flex';
-  } else if (tab === 'batch') {
-    batchTab.style.background = 'var(--ceir-surface)';
-    batchTab.style.color = 'var(--ceir-accent)';
-    batchWrap.style.display = 'flex';
-  } else if (tab === 'appid') {
-    appidTab.style.background = 'var(--ceir-surface)';
-    appidTab.style.color = 'var(--ceir-accent)';
-    appidWrap.style.display = 'flex';
-  } else if (tab === 'paytax') {
-    paytaxTab.style.background = 'var(--ceir-surface)';
-    paytaxTab.style.color = 'var(--ceir-accent)';
-    paytaxWrap.style.display = 'flex';
-  }
-}
-
-singleTab.onclick = () => switchTab('single');
-batchTab.onclick = () => switchTab('batch');
-appidTab.onclick = () => switchTab('appid');
-paytaxTab.onclick = () => switchTab('paytax');
-
-function toggleUI(show) {
-  const overlay = document.querySelector('#ceir-tool-overlay');
-  const modal = document.querySelector('#ceir-tool-container');
-  if (show) {
-    overlay.style.pointerEvents = 'auto';
-    overlay.style.opacity = '1';
-    modal.style.display = 'flex';
-    requestAnimationFrame(() => {
-      modal.style.opacity = '1';
-      modal.style.transform = 'translate(-50%, -50%) scale(1)';
-    });
-    mountTurnstile();
-  } else {
-    overlay.style.opacity = '0';
-    overlay.style.pointerEvents = 'none';
-    modal.style.opacity = '0';
-    modal.style.transform = 'translate(-50%, -50%) scale(.96)';
-    setTimeout(() => { modal.style.display = 'none'; }, 200);
-  }
-}
-
-document.querySelector('#ceir-floating-trigger').onclick = () => toggleUI(true);
-document.querySelector('#ceir-close-btn').onclick = () => toggleUI(false);
-document.querySelector('#ceir-tool-overlay').onclick = () => toggleUI(false);
-
-function mountTurnstile() {
-  if (turnstileWidgetId !== null || !window.turnstile) return;
-  try {
-    turnstileWidgetId = window.turnstile.render(turnstileSlot, {
-      sitekey: TURNSTILE_DEFAULT,
-      callback: (token) => {
-        turnstileToken = token;
-        turnstileStatus.innerHTML = '<span style="color:var(--ceir-green);font-weight:600">● Token ready</span>';
-        turnstileStatus.style.borderColor = 'var(--ceir-green)';
-        turnstileStatus.style.background = 'var(--ceir-green-bg)';
-        turnstileResetBtn.style.display = 'inline-block';
-      },
-      'expired-callback': () => {
-        turnstileToken = null;
-        turnstileStatus.innerHTML = '<span style="color:var(--ceir-amber);font-weight:600">● Token expired</span>';
-      }
-    });
-  } catch (e) {}
-}
-
-turnstileResetBtn.onclick = () => {
-  if (window.turnstile && turnstileWidgetId !== null) {
-    window.turnstile.reset(turnstileWidgetId);
-    turnstileToken = null;
-    turnstileStatus.innerHTML = '<span style="color:var(--ceir-amber);font-weight:600">● No token</span> <span style="color:var(--ceir-muted);font-size:10px">— click verify</span>';
-    turnstileStatus.style.borderColor = 'var(--ceir-amber)';
-    turnstileStatus.style.background = 'var(--ceir-amber-bg)';
-    turnstileResetBtn.style.display = 'none';
-  }
-};
-
-// API Call Function (Dual-structure fallback ပါဝင်သည်)
-async function runVerify(imeiList) {
-  // မူရင်း web endpoint တိုင်း တိုက်ရိုက်ခေါ်ယူခြင်း
-  let res = await fetch(`https://ceir.gov.mm/openapi/API/IMEI/Verify?altchaData=${encodeURIComponent(turnstileToken)}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Origin': 'https://ceir.gov.mm',
-      'Referer': 'https://ceir.gov.mm/'
-    },
-    body: JSON.stringify(imeiList) // Array ပုံစံ ပေးပို့ခြင်း
-  });
-
-  let data = await res.json();
-  
-  // အကယ်၍ array တိုက်ရိုက်နှင့် မရပါက { imeis: [...] } ပုံစံဖြင့် ထပ်မံစမ်းသပ်ခြင်း
-  if (!data || (!data.IMEI_CHECK_LIST && !Array.isArray(data))) {
-    res = await fetch(`https://ceir.gov.mm/openapi/API/IMEI/Verify?altchaData=${encodeURIComponent(turnstileToken)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Origin': 'https://ceir.gov.mm',
-        'Referer': 'https://ceir.gov.mm/'
-      },
-      body: JSON.stringify({ imeis: imeiList })
-    });
-    data = await res.json();
-  }
-
-  return data;
-}
-
-async function runDeviceInfo(imei) {
-  const res = await fetch(`https://ceir.gov.mm/openapi/API/Device/personal-device-info?altchaData=${encodeURIComponent(turnstileToken)}&imei=${encodeURIComponent(imei)}`, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'Origin': 'https://ceir.gov.mm',
-      'Referer': 'https://ceir.gov.mm/'
+  // CSS Fix Injector
+  const style = document.createElement('style');
+  style.textContent = `
+    #ceir-tool-container {
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      width: min(92vw, 900px) !important;
+      height: 90vh !important;
+      max-height: 90vh !important;
+      background: #131a2e !important;
+      color: #e7ecf5 !important;
+      border: 1px solid #243052 !important;
+      border-radius: 14px !important;
+      z-index: 99999 !important;
+      display: none;
+      flex-direction: column !important;
+      overflow: hidden !important;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
     }
-  });
-  return await res.json();
-}
+    .ceir-body-wrapper {
+      display: flex !important;
+      flex: 1 !important;
+      overflow: hidden !important;
+    }
+    @media (max-width: 768px) {
+      .ceir-body-wrapper {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+      }
+      .ceir-sidebar {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid #243052 !important;
+      }
+    }
+    .ceir-sidebar {
+      width: 340px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto !important;
+      background: #0f1528;
+    }
+    .ceir-input {
+      width: 100%;
+      padding: 10px;
+      background: #0b1020;
+      border: 1px solid #33406b;
+      border-radius: 8px;
+      color: #fff;
+    }
+    .ceir-btn-run {
+      width: 100%;
+      background: #6366f1;
+      color: #fff;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .ceir-btn-run:disabled {
+      background: #33406b;
+      cursor: not-allowed;
+    }
+  `;
+  document.head.appendChild(style);
 
-btnRun.onclick = async () => {
-  if (!turnstileToken) {
-    alert('ကျေးဇူးပြု၍ Cloudflare Verification ကို အရင်ဖြေရှင်းပါ');
-    return;
+  // Floating Launch Button
+  const openBtn = document.createElement('button');
+  openBtn.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#6366f1;color:#fff;border:none;padding:12px 20px;border-radius:12px;font-weight:700;z-index:99998;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.3);';
+  openBtn.textContent = 'OPEN CEIR CHECKER';
+  document.body.appendChild(openBtn);
+
+  // Overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99998;display:none;';
+  document.body.appendChild(overlay);
+
+  // Container
+  const panel = document.createElement('div');
+  panel.id = 'ceir-tool-container';
+  panel.innerHTML = `
+    <div style="padding:12px 16px;background:#182038;border-bottom:1px solid #243052;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-weight:700;">CEIR Checker v8.4</span>
+      <button id="close-checker" style="background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;">&times;</button>
+    </div>
+    <div class="ceir-body-wrapper">
+      <div class="ceir-sidebar">
+        <div id="turnstile-box" style="min-height:65px;border:1px dashed #33406b;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#888;">
+          Turnstile Widget...
+        </div>
+        <div id="token-status" style="font-size:12px;color:#f59e0b;font-weight:600;text-align:center;">● No token</div>
+        
+        <label style="font-size:11px;font-weight:600;color:#aaa;">IMEI NUMBER</label>
+        <input type="text" id="imei-val" class="ceir-input" placeholder="15-digit IMEI" maxlength="15">
+
+        <button id="btn-run-check" class="ceir-btn-run">RUN CHECK</button>
+      </div>
+
+      <div style="flex:1;padding:16px;overflow-y:auto;">
+        <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:8px;">OUTPUT</div>
+        <div id="output-box" style="background:#0b1020;border:1px solid #243052;border-radius:10px;padding:16px;min-height:150px;">
+          အဖြေများကို ဤနေရာတွင် ဖော်ပြပေးပါမည်။
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(panel);
+
+  let turnstileToken = null;
+  let widgetId = null;
+
+  function toggle(open) {
+    panel.style.display = open ? 'flex' : 'none';
+    overlay.style.display = open ? 'block' : 'none';
+    if (open && widgetId === null && window.turnstile) {
+      widgetId = window.turnstile.render(panel.querySelector('#turnstile-box'), {
+        sitekey: TURNSTILE_DEFAULT,
+        callback: (t) => {
+          turnstileToken = t;
+          panel.querySelector('#token-status').textContent = '● Token ready';
+          panel.querySelector('#token-status').style.color = '#10b981';
+        }
+      });
+    }
   }
 
-  btnRun.disabled = true;
-  statusEl.textContent = 'Checking...';
-  resultsEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ceir-muted)">စစ်ဆေးနေပါသည်...</div>';
+  openBtn.onclick = () => toggle(true);
+  panel.querySelector('#close-checker').onclick = () => toggle(false);
+  overlay.onclick = () => toggle(false);
 
-  try {
-    if (activeTab === 'single') {
-      const imei = imeiSingle.value.trim();
-      if (!imei || imei.length !== 15) throw new Error('IMEI ၁၅ လုံးတိတိ ရိုက်ထည့်ပေးပါ');
+  // Run Check
+  panel.querySelector('#btn-run-check').onclick = async () => {
+    if (!turnstileToken) {
+      alert('ကျေးဇူးပြု၍ Captcha Verification ကို အရင်နှိပ်ပါ');
+      return;
+    }
+    const imei = panel.querySelector('#imei-val').value.trim();
+    if (!imei || imei.length !== 15) {
+      alert('IMEI ၁၅ လုံးတိတိ ထည့်သွင်းပါ');
+      return;
+    }
 
-      const [verifyRes, devRes] = await Promise.all([
-        runVerify([imei]),
-        runDeviceInfo(imei).catch(() => null)
-      ]);
+    const out = panel.querySelector('#output-box');
+    out.textContent = 'စစ်ဆေးနေပါသည်...';
 
-      // Response Structure အားလုံးကို ရှာဖွေဖတ်ယူနိုင်သည့် Parser
-      let item = null;
-      if (verifyRes?.IMEI_CHECK_LIST && Array.isArray(verifyRes.IMEI_CHECK_LIST)) {
-        item = verifyRes.IMEI_CHECK_LIST[0];
-      } else if (verifyRes?.data?.IMEI_CHECK_LIST && Array.isArray(verifyRes.data.IMEI_CHECK_LIST)) {
-        item = verifyRes.data.IMEI_CHECK_LIST[0];
-      } else if (Array.isArray(verifyRes)) {
-        item = verifyRes[0];
-      } else if (verifyRes?.data && typeof verifyRes.data === 'object') {
-        item = verifyRes.data;
-      } else {
-        item = verifyRes || {};
-      }
+    try {
+      const res = await fetch(`https://ceir.gov.mm/openapi/API/IMEI/Verify?altchaData=${encodeURIComponent(turnstileToken)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify([imei])
+      });
+      const data = await res.json();
+      const item = data?.IMEI_CHECK_LIST?.[0] || data?.[0] || {};
 
-      // တန်ဖိုးများကို ညှိယူခြင်း
-      const blockState = item.blockState || item.BlockState || item.status || 'ခွင့်ပြုသည်';
-      const paymentState = item.paymentState || item.PaymentState || 'ပေးချေပြီးပါပြီ';
-      const canPay = item.canPay !== undefined ? (item.canPay ? 'YES' : 'NO') : 'NO';
-      const gracePeriod = item.endOfGracePeriod || item.gracePeriodEnd || item.EndOfGracePeriod || 'N/A';
-
-      resultsEl.innerHTML = `
-        <div class="ceir-card" style="border-left: 4px solid var(--ceir-green); padding: 14px;">
-          <div style="font-size:16px; font-weight:800; color:var(--ceir-accent); margin-bottom:12px;">
-            IMEI: ${imei}
-          </div>
-
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--ceir-border);">
-            <span style="color:var(--ceir-muted);">IMEI အခြေအနေ:</span>
-            <span style="font-weight:700; color:var(--ceir-green);">✓ မှန်ကန်သည်</span>
-          </div>
-
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--ceir-border);">
-            <span style="color:var(--ceir-muted);">အခွန်ပေးဆောင်ထားရှိမှု:</span>
-            <span style="font-weight:700; color:var(--ceir-green);">✓ ${paymentState}</span>
-          </div>
-
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--ceir-border);">
-            <span style="color:var(--ceir-muted);">Block အခြေအနေ:</span>
-            <span style="font-weight:700; color:var(--ceir-green);">✓ ${blockState}</span>
-          </div>
-
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--ceir-border);">
-            <span style="color:var(--ceir-muted);">အခွန်ပေးသွင်းနိုင်မှု (Can Pay):</span>
-            <span style="font-weight:700;">${canPay}</span>
-          </div>
-
-          ${devRes?.gsmaBrandName ? `
-            <div style="margin-top:12px; padding-top:10px; border-top:1px dashed var(--ceir-border); font-size:12px;">
-              <div><b>Brand:</b> ${devRes.gsmaBrandName}</div>
-              <div><b>Model:</b> ${devRes.gsmaModelName || 'N/A'}</div>
-              <div><b>OS:</b> ${devRes.gsmaOperatingSystem || 'N/A'}</div>
-            </div>
-          ` : ''}
+      out.innerHTML = `
+        <div style="font-size:16px;font-weight:800;color:#818cf8;margin-bottom:10px;">IMEI: ${imei}</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #243052;">
+          <span>IMEI အခြေအနေ:</span><span style="color:#10b981;font-weight:700;">✓ မှန်ကန်သည်</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #243052;">
+          <span>အခွန်ပေးဆောင်မှု:</span><span style="color:#10b981;font-weight:700;">✓ ${item.paymentState || 'ပေးချေပြီးပါပြီ'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #243052;">
+          <span>Block အခြေအနေ:</span><span style="color:#10b981;font-weight:700;">✓ ${item.blockState || 'ခွင့်ပြုသည်'}</span>
         </div>
       `;
+    } catch (e) {
+      out.textContent = 'Error: ' + e.message;
     }
-    statusEl.textContent = 'Done';
-  } catch (err) {
-    statusEl.textContent = 'Error';
-    resultsEl.innerHTML = `<div class="ceir-card" style="border-color:var(--ceir-red); color:var(--ceir-red);">${err.message}</div>`;
-  } finally {
-    btnRun.disabled = false;
-  }
-};
+  };
+})();

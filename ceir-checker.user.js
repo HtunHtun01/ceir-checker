@@ -34,8 +34,8 @@
     'update-evidence': '0x4AAAAAADmoQuDsFEizt-Hn'
   };
 
-  const TOKEN_TTL = 4 * 60 * 1000;
-  const MINT_TIMEOUT = 30 * 1000;
+  const TOKEN_TTL = 4 * 60 * 1000;   // 4 min
+  const MINT_TIMEOUT = 30 * 1000;    // 30 sec
 
   // ============================================================
   // STYLES
@@ -244,6 +244,7 @@
       word-break: break-word;
     }
 
+    /* Dark mode */
     @media (prefers-color-scheme: dark) {
       #${PANEL_ID} {
         background: #131a2e;
@@ -630,6 +631,7 @@
   });
 
   tokenInput.addEventListener('input', () => {
+    // Manual edit — reset indicator
     updateTokenFieldUI('');
     if (cachedToken !== tokenInput.value.trim()) {
       clearTokenState();

@@ -1,8 +1,9 @@
 // ==UserScript==
-// @name         CEIR Read-Only Checker (Auto Token + Modern UI)
-// @namespace    https://github.com/
-// @version      3.0.0
-// @description  Read-only CEIR checker with auto Cloudflare Turnstile minting and modern UI.
+// @name         MIMI CEIR CHECKER 8.4 (Unlocked / No License)
+// @namespace    https://github.com/HtunHtun01/ceir-checker
+// @version      8.4.1
+// @description  Full UI CEIR checker without license server check. Runs on ceir.gov.mm.
+// @author       MIMO (Unlocked)
 // @match        https://ceir.gov.mm/*
 // @grant        none
 // @run-at       document-idle
@@ -11,727 +12,449 @@
 (function () {
   'use strict';
 
-  if (window.__ceirReadOnlyChecker) return;
-  window.__ceirReadOnlyChecker = true;
+  if (window.__ceirCheckerLoaded) return;
+  window.__ceirCheckerLoaded = true;
 
-  // ============================================================
-  // CONFIGURATION
-  // ============================================================
-  const BASE = 'https://ceir.gov.mm/openapi/API';
-  const PANEL_ID = 'ceir-read-only-checker';
+  // Turnstile Keys
+  const TURNSTILE_DEFAULT = '0x4AAAAAADmotCU2bSBwXlRk';
+  const TURNSTILE_ACTION = '0x4AAAAAADmoQuDsFEizt-Hn';
 
   const SITEKEYS = {
-    'verify-imei': '0x4AAAAAADmotCU2bSBwXlRk',
-    'device-data': '0x4AAAAAADmoQuDsFEizt-Hn',
-    'application': '0x4AAAAAADmoQuDsFEizt-Hn',
-    'applicant': '0x4AAAAAADmoQuDsFEizt-Hn',
-    'register-request': '0x4AAAAAADmoQuDsFEizt-Hn',
-    'check-unpaid': '0x4AAAAAADmoQuDsFEizt-Hn',
-    'same-device': '0x4AAAAAADmoQuDsFEizt-Hn',
-    'payment-hub': '0x4AAAAAADmoQuDsFEizt-Hn',
-    'payment-result': '0x4AAAAAADmoQuDsFEizt-Hn',
-    'update-applicant': '0x4AAAAAADmoQuDsFEizt-Hn',
-    'update-evidence': '0x4AAAAAADmoQuDsFEizt-Hn'
+    'verify-imei': TURNSTILE_DEFAULT,
+    'device-data': TURNSTILE_ACTION,
+    'application': TURNSTILE_ACTION,
+    'applicant': TURNSTILE_ACTION,
+    'register-request': TURNSTILE_ACTION,
+    'check-unpaid': TURNSTILE_ACTION,
+    'same-device': TURNSTILE_ACTION,
+    'payment-hub': TURNSTILE_ACTION,
+    'payment-result': TURNSTILE_ACTION,
+    'update-applicant': TURNSTILE_ACTION,
+    'update-evidence': TURNSTILE_ACTION
   };
 
-  const TOKEN_TTL = 4 * 60 * 1000;   // 4 min
-  const MINT_TIMEOUT = 30 * 1000;    // 30 sec
+  // Profile Decrypt Secret Key
+  const PROFILE_DECRYPT_KEY = 'CEIR_PVT_2024_xK9mP2qR7wN4jL8hT5vB3cF6';
 
-  // ============================================================
-  // STYLES
-  // ============================================================
-  const styles = `
-    #${PANEL_ID} {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      z-index: 2147483647;
-      width: min(400px, calc(100vw - 32px));
-      color: #18212f;
-      background: #ffffff;
-      border: 1px solid #d5dae3;
-      border-radius: 14px;
-      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.24);
-      font: 13px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      overflow: hidden;
-      transition: box-shadow 0.2s;
-    }
-    #${PANEL_ID} * { box-sizing: border-box; }
+  // Inject Tailwind & Custom CSS
+  const tailwindScript = document.createElement('script');
+  tailwindScript.src = 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4';
+  tailwindScript.async = true;
+  document.head.appendChild(tailwindScript);
 
-    #${PANEL_ID} .checker-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 12px 14px;
-      background: #101828;
-      color: #ffffff;
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    :root, .dark-host {
+      --primary: #818cf8; --primary-foreground: #0b1020;
+      --secondary: #1a2340; --secondary-foreground: #aab6d4;
+      --card: #131a2e; --card-foreground: #e7ecf5;
+      --border: #243052; --input: #33406b; --ring: #818cf8;
+      --muted: #1a2340; --muted-foreground: #8792ad;
+      --accent: #1a2340; --accent-foreground: #e7ecf5;
+      --ceir-bg: #0b1020; --ceir-surface: #131a2e;
+      --ceir-border: #243052; --ceir-text: #e7ecf5; --ceir-muted: #8792ad;
+      --ceir-accent: #818cf8; --ceir-accent-hover: #a5b4fc; --ceir-accent-light: rgba(129,140,248,.14);
+      --ceir-green: #6ee7b7; --ceir-green-bg: rgba(52,211,153,.15);
+      --ceir-red: #fca5a5; --ceir-red-bg: rgba(248,113,113,.14);
+      --ceir-amber: #fcd34d; --ceir-amber-bg: rgba(252,211,77,.12);
+      --ceir-row-hover: #182038; --ceir-sidebar-bg: #0f1528;
+      --radius: 0.625rem;
+      --ceir-w: 90vw; --ceir-h: 88vh; --ceir-header-h: 48px; --ceir-sidebar-w: 336px;
+      --ceir-gap: 8px; --ceir-gap-sm: 4px; --ceir-badge-pad: 2px 8px; --ceir-badge-font: 11px;
+      --ceir-font-2xs: 9px; --ceir-font-xs: 10.5px; --ceir-font-sm: 11.5px; --ceir-font-base: 12.5px;
+      --ceir-pad-xs: 4px; --ceir-pad-sm: 6px; --ceir-pad-md: 10px; --ceir-pad-lg: 14px; --ceir-pad-xl: 16px;
+      --ceir-table-font: 12.5px; --ceir-table-th: 11px; --ceir-input-pad: 10px 14px; --ceir-btn-pad: 9px 20px;
+      --ceir-radius-sm: calc(var(--radius) - 2px); --ceir-radius: var(--radius); --ceir-card-radius: calc(var(--radius) + 4px);
     }
-    #${PANEL_ID} .checker-title {
-      font-weight: 700;
-      flex: 1;
-      min-width: 0;
+    .ceir-light {
+      --primary: #4f46e5; --primary-foreground: #ffffff;
+      --card: #ffffff; --card-foreground: #0f172a;
+      --border: #e2e8f0; --input: #cbd5e1; --ring: #4f46e5;
+      --muted: #eef2f7; --muted-foreground: #64748b;
+      --accent: #eef2ff; --accent-foreground: #3730a3;
+      --ceir-bg: #f8fafc; --ceir-surface: #ffffff;
+      --ceir-border: #e2e8f0; --ceir-text: #0f172a; --ceir-muted: #64748b;
+      --ceir-accent: #4f46e5; --ceir-accent-hover: #4338ca; --ceir-accent-light: rgba(79,70,229,.1);
+      --ceir-green: #16a34a; --ceir-green-bg: rgba(22,163,74,.1);
+      --ceir-red: #dc2626; --ceir-red-bg: rgba(220,38,38,.08);
+      --ceir-amber: #b45309; --ceir-amber-bg: rgba(180,83,9,.1);
+      --ceir-row-hover: #f1f5f9; --ceir-sidebar-bg: #f1f5f9;
     }
-    #${PANEL_ID} .checker-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.12);
-      font-size: 11px;
-      font-weight: 600;
-      white-space: nowrap;
+    .hero-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .hero-tbl th { text-align: left; padding: 9px 16px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; color: var(--muted-foreground); background: var(--secondary); border-bottom: 1px solid var(--border); }
+    .hero-tbl td { padding: 9px 16px; border-top: 1px solid var(--border); vertical-align: top; word-break: break-word; }
+    .hero-tbl tbody tr:hover { background: rgba(127,127,127,.07); }
+    #ceir-tool-container {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(.96);
+      width: var(--ceir-w); height: var(--ceir-h);
+      background: var(--card); color: var(--card-foreground);
+      border: 1px solid var(--border); border-radius: calc(var(--radius) + 8px);
+      z-index: 99999; display: none; flex-direction: column; overflow: hidden;
+      box-shadow: 0 24px 48px -12px rgba(0,0,0,0.35); transition: opacity .2s, transform .2s; opacity: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
     }
-    #${PANEL_ID} .checker-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #f59e0b;
-      animation: cPulse 1.5s infinite;
-    }
-    #${PANEL_ID} .checker-dot.ready {
-      background: #10b981;
-      animation: none;
-    }
-    #${PANEL_ID} .checker-dot.error {
-      background: #ef4444;
-      animation: none;
-    }
-    @keyframes cPulse {
-      0%, 100% { opacity: 0.5; transform: scale(0.85); }
-      50% { opacity: 1; transform: scale(1.15); }
-    }
-
-    #${PANEL_ID} button {
-      appearance: none;
-      min-height: 34px;
-      padding: 7px 10px;
-      border: 1px solid #cbd2dc;
-      border-radius: 8px;
-      background: #f8fafc;
-      color: #18212f;
-      cursor: pointer;
-      font: inherit;
-      font-weight: 600;
-      transition: all 0.15s;
-    }
-    #${PANEL_ID} button:hover { background: #eef2f7; }
-    #${PANEL_ID} button:focus-visible,
-    #${PANEL_ID} input:focus-visible {
-      outline: 3px solid rgba(37, 99, 235, 0.28);
-      outline-offset: 1px;
-    }
-    #${PANEL_ID} button:disabled {
-      cursor: wait;
-      opacity: 0.6;
-    }
-    #${PANEL_ID} .checker-header button {
-      min-height: 28px;
-      padding: 4px 9px;
-      border-color: rgba(255, 255, 255, 0.35);
-      background: rgba(255, 255, 255, 0.12);
-      color: #ffffff;
-    }
-
-    #${PANEL_ID} .checker-body {
-      display: grid;
-      gap: 10px;
-      padding: 14px;
-      max-height: 700px;
-      overflow-y: auto;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-    }
-    #${PANEL_ID}.checker-collapsed .checker-body {
-      max-height: 0;
-      padding-top: 0;
-      padding-bottom: 0;
-      overflow: hidden;
-    }
-
-    #${PANEL_ID} label {
-      display: grid;
-      gap: 5px;
-      color: #465066;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    #${PANEL_ID} label .optional {
-      color: #9ca3af;
-      font-weight: 400;
-      font-size: 11px;
-    }
-    #${PANEL_ID} input {
-      width: 100%;
-      min-height: 36px;
-      padding: 8px 10px;
-      border: 1px solid #cbd2dc;
-      border-radius: 8px;
-      background: #ffffff;
-      color: #18212f;
-      font: 13px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace;
-      transition: all 0.2s;
-    }
-    #${PANEL_ID} input.token-ready {
-      background: #f0fdf4;
-      border-color: #10b981;
-    }
-    #${PANEL_ID} input.token-error {
-      background: #fef2f2;
-      border-color: #ef4444;
-    }
-
-    #${PANEL_ID} .input-with-status {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-    #${PANEL_ID} .input-with-status input { flex: 1; }
-    #${PANEL_ID} .input-status {
-      font-size: 11px;
-      font-weight: 600;
-      color: #9ca3af;
-      white-space: nowrap;
-      min-width: 60px;
-      text-align: right;
-    }
-    #${PANEL_ID} .input-status.ready { color: #10b981; }
-    #${PANEL_ID} .input-status.error { color: #ef4444; }
-
-    #${PANEL_ID} .checker-actions {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-    }
-    #${PANEL_ID} .checker-actions + .checker-actions { margin-top: 4px; }
-
-    #${PANEL_ID} .checker-primary {
-      background: #1d4ed8;
-      border-color: #1d4ed8;
-      color: #ffffff;
-    }
-    #${PANEL_ID} .checker-primary:hover { background: #1e40af; }
-
-    #${PANEL_ID} .checker-mint {
-      background: linear-gradient(135deg, #059669, #10b981);
-      border: none;
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-    #${PANEL_ID} .checker-mint:hover {
-      background: linear-gradient(135deg, #047857, #059669);
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45);
-    }
-
-    #${PANEL_ID} .checker-note {
-      margin: 0;
-      color: #667085;
-      font-size: 11px;
-      line-height: 1.5;
-    }
-    #${PANEL_ID} .checker-message {
-      min-height: 108px;
-      max-height: 260px;
-      margin: 0;
-      padding: 10px;
-      overflow: auto;
-      border: 1px solid #e1e6ed;
-      border-radius: 8px;
-      background: #f5f7fa;
-      color: #27364a;
-      font: 11px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    /* Dark mode */
-    @media (prefers-color-scheme: dark) {
-      #${PANEL_ID} {
-        background: #131a2e;
-        color: #e7ecf5;
-        border-color: #243052;
-      }
-      #${PANEL_ID} .checker-body label { color: #aab6d4; }
-      #${PANEL_ID} input {
-        background: #0b1020;
-        color: #e7ecf5;
-        border-color: #33406b;
-      }
-      #${PANEL_ID} input.token-ready {
-        background: rgba(16, 185, 129, 0.15);
-      }
-      #${PANEL_ID} input.token-error {
-        background: rgba(239, 68, 68, 0.15);
-      }
-      #${PANEL_ID} button {
-        background: #1a2340;
-        color: #e7ecf5;
-        border-color: #33406b;
-      }
-      #${PANEL_ID} button:hover { background: #243052; }
-      #${PANEL_ID} .checker-message {
-        background: #0b1020;
-        color: #aab6d4;
-        border-color: #243052;
-      }
-      #${PANEL_ID} .checker-note { color: #8792ad; }
-    }
+    .ceir-input { width: 100%; background: transparent; border: 1px solid var(--input); border-radius: var(--radius); padding: var(--ceir-input-pad); font-size: var(--ceir-font-base); color: var(--foreground); outline: none; }
+    .ceir-input:focus { border-color: var(--ring); }
+    .ceir-btn-primary { width: 100%; background: var(--primary); color: var(--primary-foreground); border: none; border-radius: var(--radius); padding: var(--ceir-btn-pad); min-height: 40px; font-size: var(--ceir-font-base); font-weight: 600; cursor: pointer; }
+    .ceir-btn-primary:disabled { background: var(--muted); color: var(--muted-foreground); cursor: not-allowed; }
+    .ceir-tab { flex: 1; padding: 7px 12px; text-align: center; font-size: var(--ceir-font-xs); font-weight: 500; border-radius: calc(var(--radius) - 2px); cursor: pointer; border: none; background: transparent; color: var(--muted-foreground); }
+    .ceir-tab:hover { background: var(--accent); color: var(--accent-foreground); }
+    .ceir-tgl { position: relative; display: inline-block; width: 40px; height: 24px; cursor: pointer; }
+    .ceir-tgl input { opacity: 0; width: 0; height: 0; }
+    .ceir-tgl span { position: absolute; inset: 0; background: var(--input); border-radius: 9999px; transition: background .2s; }
+    .ceir-tgl span::after { content: ""; position: absolute; width: 16px; height: 16px; left: 4px; top: 4px; background: #fff; border-radius: 50%; transition: transform .2s; }
+    .ceir-tgl input:checked + span { background: var(--primary); }
+    .ceir-tgl input:checked + span::after { transform: translateX(16px); }
+    .ceir-table { width: 100%; border-collapse: collapse; font-size: var(--ceir-table-font); }
+    .ceir-table th { padding: 12px 14px; text-align: left; font-weight: 500; color: var(--muted-foreground); background: var(--muted); border-bottom: 1px solid var(--border); }
+    .ceir-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .ceir-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--ceir-card-radius); padding: var(--ceir-pad-lg); }
+    .ceir-b { display: inline-flex; align-items: center; padding: var(--ceir-badge-pad); border-radius: var(--radius); font-size: var(--ceir-badge-font); font-weight: 500; }
   `;
+  document.head.appendChild(styleEl);
 
-  // ============================================================
-  // PANEL HTML
-  // ============================================================
-  const panel = document.createElement('section');
-  panel.id = PANEL_ID;
-  panel.setAttribute('aria-label', 'CEIR read-only checker');
-  panel.innerHTML = `
-    <style>${styles}</style>
-    <header class="checker-header">
-      <span class="checker-title">CEIR Checker</span>
-      <span class="checker-status">
-        <span class="checker-dot" id="checker-status-dot"></span>
-        <span id="checker-status-text">Idle</span>
-      </span>
-      <button type="button" data-action="toggle" aria-expanded="true">Hide</button>
-    </header>
-    <div class="checker-body">
+  // Floating Trigger Button
+  const triggerBtn = document.createElement('button');
+  triggerBtn.id = 'ceir-floating-trigger';
+  triggerBtn.style.cssText = 'position:fixed;bottom:16px;right:16px;background:var(--primary,#818cf8);color:var(--primary-foreground,#0b1020);border:none;padding:10px 18px;border-radius:12px;font-weight:600;font-size:12.5px;cursor:pointer;z-index:99997;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,0.25);';
+  triggerBtn.innerHTML = '<span style="width:7px;height:7px;background:#10b981;border-radius:50%;display:inline-block"></span>OPEN CEIR CHECKER';
+  document.body.appendChild(triggerBtn);
 
-      <div class="checker-actions">
-        <button type="button" class="checker-mint" data-action="mint">
-          🔄 Get Fresh Token
-        </button>
-        <button type="button" data-action="clear-token">Clear Token</button>
+  // Overlay Backdrop
+  const overlay = document.createElement('div');
+  overlay.id = 'ceir-tool-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.32);backdrop-filter:blur(6px);z-index:99998;transition:opacity .25s;opacity:0;pointer-events:none;';
+  document.body.appendChild(overlay);
+
+  // Main UI Modal
+  const modal = document.createElement('div');
+  modal.id = 'ceir-tool-container';
+  modal.innerHTML = `
+    <!-- HEADER -->
+    <div style="height:var(--ceir-header-h);display:flex;align-items:center;justify-content:space-between;padding:0 var(--ceir-pad-xl);border-bottom:1px solid var(--ceir-border);background:var(--ceir-surface);">
+      <div style="display:flex;align-items:center;gap:var(--ceir-gap)">
+        <div style="width:24px;height:24px;background:linear-gradient(135deg,#6366f1,#818cf8);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:900;">CI</div>
+        <span style="font-size:var(--ceir-font-base);font-weight:700;">CEIR Checker</span>
+        <span style="font-size:var(--ceir-font-2xs);color:var(--ceir-muted);">v8.4 Unlocked</span>
+        <span id="ceir-result-count" style="font-size:var(--ceir-font-2xs);color:var(--ceir-accent);font-weight:700;display:none;"></span>
       </div>
-
-      <label>
-        altchaData (auto or manual)
-        <div class="input-with-status">
-          <input id="checker-token" type="text" autocomplete="off" spellcheck="false"
-            placeholder="Click 'Get Fresh Token' or paste manually">
-          <span class="input-status" id="token-status">—</span>
+      <div style="display:flex;align-items:center;gap:var(--ceir-gap)">
+        <button id="btn-export-csv" style="font-size:var(--ceir-font-2xs);background:var(--ceir-surface);border:1px solid var(--ceir-border);color:var(--ceir-muted);padding:var(--ceir-pad-xs) var(--ceir-pad-md);border-radius:20px;cursor:pointer;display:none;">Export CSV</button>
+        <button id="ceir-close-btn" style="background:none;border:none;color:var(--ceir-muted);cursor:pointer;font-size:20px;">&times;</button>
+      </div>
+    </div>
+    <!-- BODY -->
+    <div style="display:flex;flex:1;overflow:hidden">
+      <!-- SIDEBAR -->
+      <div style="width:var(--ceir-sidebar-w);border-right:1px solid var(--ceir-border);display:flex;flex-direction:column;padding:var(--ceir-pad-md);gap:var(--ceir-gap);overflow-y:auto;background:var(--ceir-sidebar-bg);">
+        <div id="ceir-turnstile-status" style="padding:var(--ceir-pad-sm);border-radius:var(--ceir-radius);border:1px solid var(--ceir-amber);background:var(--ceir-amber-bg);font-size:var(--ceir-font-sm);text-align:center;">
+          <span style="color:var(--ceir-amber);font-weight:600">● No token</span> <span style="color:var(--ceir-muted);font-size:10px">— click verify</span>
         </div>
-      </label>
+        <div id="ceir-turnstile-slot" style="width:100%;min-height:65px;border:1px dashed var(--ceir-border);border-radius:var(--ceir-radius);display:flex;align-items:center;justify-content:center;font-size:var(--ceir-font-xs);color:var(--ceir-muted);">
+          Loading Turnstile…
+        </div>
+        <button id="ceir-turnstile-reset" style="padding:var(--ceir-pad-xs) var(--ceir-pad-sm);font-size:var(--ceir-font-xs);border:1px solid var(--ceir-border);background:var(--ceir-bg);border-radius:var(--ceir-radius-sm);cursor:pointer;display:none;">↻ Reset verification</button>
+        
+        <!-- TABS -->
+        <div style="display:flex;background:var(--ceir-bg);padding:3px;border-radius:var(--ceir-radius);gap:2px;">
+          <button id="btn-single-tab" class="ceir-tab" style="background:var(--ceir-surface);color:var(--ceir-accent);">Single</button>
+          <button id="btn-batch-tab" class="ceir-tab">Batch</button>
+          <button id="btn-appid-tab" class="ceir-tab">App ID</button>
+          <button id="btn-paytax-tab" class="ceir-tab">Pay Tax</button>
+        </div>
 
-      <label>
-        IMEI (15 digits)
-        <input id="checker-imei" type="text" inputmode="numeric" autocomplete="off"
-          maxlength="15" placeholder="e.g. 490154203237518">
-      </label>
+        <!-- INPUT WRAPPERS -->
+        <div id="single-input-wrapper" style="display:flex;flex-direction:column;gap:var(--ceir-gap-sm)">
+          <label style="font-size:var(--ceir-font-2xs);font-weight:600;color:var(--ceir-muted);">IMEI NUMBER</label>
+          <input type="text" id="imei-single-input" class="ceir-input" placeholder="15-digit IMEI" maxlength="15">
+        </div>
 
-      <label>
-        Declaration ID / hash <span class="optional">(optional)</span>
-        <input id="checker-reference" type="text" autocomplete="off" spellcheck="false"
-          placeholder="Required for status / applicant">
-      </label>
+        <div id="batch-input-wrapper" style="display:none;flex-direction:column;gap:var(--ceir-gap-sm)">
+          <label style="font-size:var(--ceir-font-2xs);font-weight:600;color:var(--ceir-muted);">BATCH IMEIS</label>
+          <textarea id="imei-batch-input" rows="8" class="ceir-input" style="resize:none" placeholder="One IMEI per line..."></textarea>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:var(--ceir-font-xs);color:var(--ceir-muted);font-weight:600;">One-by-One</span>
+            <label class="ceir-tgl"><input type="checkbox" id="switch-one-by-one"><span></span></label>
+          </div>
+        </div>
 
-      <div class="checker-actions">
-        <button type="button" class="checker-primary" data-endpoint="verify">Verify IMEI</button>
-        <button type="button" data-endpoint="device">Device info</button>
-        <button type="button" data-endpoint="status">Registration status</button>
-        <button type="button" data-endpoint="applicant">Applicant</button>
+        <div id="appid-input-wrapper" style="display:none;flex-direction:column;gap:var(--ceir-gap-sm)">
+          <label style="font-size:var(--ceir-font-2xs);font-weight:600;color:var(--ceir-muted);">DECLARATION ID</label>
+          <input type="text" id="appid-input" class="ceir-input" placeholder="e.g. MM-CR-AABBCCDD">
+        </div>
+
+        <div id="paytax-input-wrapper" style="display:none;flex-direction:column;gap:var(--ceir-gap-sm)">
+          <label style="font-size:var(--ceir-font-2xs);font-weight:600;color:var(--ceir-muted);">IMEI NUMBERS (UP TO 2)</label>
+          <input type="text" id="paytax-imei1" class="ceir-input" placeholder="IMEI 1 (required)" maxlength="15">
+          <input type="text" id="paytax-imei2" class="ceir-input" placeholder="IMEI 2 (optional)" maxlength="15">
+          <input type="file" id="paytax-file-input" accept=".ceir" style="display:none">
+          <button id="paytax-load-btn" style="padding:var(--ceir-pad-sm);background:var(--ceir-bg);border:2px dashed var(--ceir-border);border-radius:var(--ceir-radius);font-size:var(--ceir-font-xs);cursor:pointer;">Load Profile (.ceir)</button>
+          <div id="paytax-applicant-preview" style="display:none;background:var(--ceir-accent-light);border:1px solid var(--ceir-border);padding:6px;border-radius:6px;">
+            <span id="paytax-applicant-name" style="font-weight:700;color:var(--ceir-accent)">-</span>
+            <button id="paytax-clear-btn" style="float:right;background:none;border:none;color:var(--ceir-red);cursor:pointer;">Clear</button>
+          </div>
+        </div>
+
+        <div id="tool-status" style="font-size:var(--ceir-font-xs);font-weight:600;color:var(--ceir-accent);background:var(--ceir-accent-light);border:1px solid var(--ceir-border);border-radius:var(--ceir-radius);padding:var(--ceir-pad-sm) var(--ceir-pad-md);min-height:24px;display:flex;align-items:center;">
+          Standing By
+        </div>
+
+        <button id="btn-check-start" class="ceir-btn-primary">RUN CHECK</button>
+        <button id="btn-check-stop" class="ceir-btn-primary" style="display:none;background:var(--ceir-red);">STOP</button>
+
+        <!-- FOOTER TOGGLES -->
+        <div style="margin-top:auto;padding-top:var(--ceir-pad-md);border-top:1px solid var(--ceir-border);display:flex;flex-direction:column;gap:var(--ceir-gap-sm)">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:var(--ceir-font-2xs);font-weight:600;color:var(--ceir-muted)">Dark Mode</span>
+            <label class="ceir-tgl"><input type="checkbox" id="switch-theme-mode"><span></span></label>
+          </div>
+        </div>
       </div>
 
-      <p class="checker-note">
-        Read-only. No license key, no fingerprint stored. Token kept in memory only.
-        If auto-mint fails, solve verification on the official page and paste manually.
-      </p>
-
-      <pre class="checker-message" role="status" aria-live="polite">Ready.
-
-1. Click "Get Fresh Token" to mint automatically
-2. Or paste altchaData manually
-3. Enter IMEI and click an action button</pre>
+      <!-- RESULTS -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:var(--ceir-pad-sm) var(--ceir-pad-xl);border-bottom:1px solid var(--ceir-border);background:var(--ceir-surface);font-size:var(--ceir-font-2xs);font-weight:600;color:var(--ceir-muted);">OUTPUT</div>
+        <div id="tool-results" style="flex:1;overflow-y:auto;padding:var(--ceir-pad-lg);display:flex;flex-direction:column;gap:var(--ceir-gap);background:var(--ceir-bg);">
+          <div style="color:var(--ceir-muted);font-size:var(--ceir-font-base);text-align:center;padding-top:120px;font-style:italic">No results yet. Enter an IMEI or App ID and click Run Check.</div>
+        </div>
+      </div>
     </div>
   `;
-  document.body.appendChild(panel);
+  document.body.appendChild(modal);
 
-  // ============================================================
-  // REFS
-  // ============================================================
-  const tokenInput = panel.querySelector('#checker-token');
-  const imeiInput = panel.querySelector('#checker-imei');
-  const referenceInput = panel.querySelector('#checker-reference');
-  const messageOutput = panel.querySelector('.checker-message');
-  const buttons = Array.from(panel.querySelectorAll('button[data-endpoint]'));
-  const toggleButton = panel.querySelector('[data-action="toggle"]');
-  const mintButton = panel.querySelector('[data-action="mint"]');
-  const clearButton = panel.querySelector('[data-action="clear-token"]');
-  const statusDot = panel.querySelector('#checker-status-dot');
-  const statusText = panel.querySelector('#checker-status-text');
-  const tokenStatus = panel.querySelector('#token-status');
+  // References
+  const singleTab = modal.querySelector('#btn-single-tab');
+  const batchTab = modal.querySelector('#btn-batch-tab');
+  const appidTab = modal.querySelector('#btn-appid-tab');
+  const paytaxTab = modal.querySelector('#btn-paytax-tab');
+  const singleWrap = modal.querySelector('#single-input-wrapper');
+  const batchWrap = modal.querySelector('#batch-input-wrapper');
+  const appidWrap = modal.querySelector('#appid-input-wrapper');
+  const paytaxWrap = modal.querySelector('#paytax-input-wrapper');
 
-  // ============================================================
-  // STATE
-  // ============================================================
-  let cachedToken = null;
-  let tokenExpiry = 0;
-  let minting = false;
-  let expiryTimer = null;
+  const imeiSingle = modal.querySelector('#imei-single-input');
+  const imeiBatch = modal.querySelector('#imei-batch-input');
+  const appidInput = modal.querySelector('#appid-input');
+  const paytaxImei1 = modal.querySelector('#paytax-imei1');
+  const paytaxImei2 = modal.querySelector('#paytax-imei2');
 
-  // ============================================================
-  // UTILITIES
-  // ============================================================
-  function writeMessage(message) {
-    messageOutput.textContent = typeof message === 'string'
-      ? message
-      : JSON.stringify(message, null, 2);
-    messageOutput.scrollTop = 0;
+  const btnRun = modal.querySelector('#btn-check-start');
+  const btnStop = modal.querySelector('#btn-check-stop');
+  const statusEl = modal.querySelector('#tool-status');
+  const resultsEl = modal.querySelector('#tool-results');
+  const turnstileSlot = modal.querySelector('#ceir-turnstile-slot');
+  const turnstileStatus = modal.querySelector('#ceir-turnstile-status');
+  const turnstileResetBtn = modal.querySelector('#ceir-turnstile-reset');
+  const themeSwitch = modal.querySelector('#switch-theme-mode');
+
+  let activeTab = 'single';
+  let isChecking = false;
+  let turnstileToken = null;
+  let turnstileWidgetId = null;
+
+  // Tab Switch Handler
+  function switchTab(tab) {
+    activeTab = tab;
+    [singleTab, batchTab, appidTab, paytaxTab].forEach((b) => {
+      b.style.background = 'transparent';
+      b.style.color = 'var(--muted-foreground)';
+    });
+    singleWrap.style.display = 'none';
+    batchWrap.style.display = 'none';
+    appidWrap.style.display = 'none';
+    paytaxWrap.style.display = 'none';
+
+    if (tab === 'single') {
+      singleTab.style.background = 'var(--ceir-surface)';
+      singleTab.style.color = 'var(--ceir-accent)';
+      singleWrap.style.display = 'flex';
+    } else if (tab === 'batch') {
+      batchTab.style.background = 'var(--ceir-surface)';
+      batchTab.style.color = 'var(--ceir-accent)';
+      batchWrap.style.display = 'flex';
+    } else if (tab === 'appid') {
+      appidTab.style.background = 'var(--ceir-surface)';
+      appidTab.style.color = 'var(--ceir-accent)';
+      appidWrap.style.display = 'flex';
+    } else if (tab === 'paytax') {
+      paytaxTab.style.background = 'var(--ceir-surface)';
+      paytaxTab.style.color = 'var(--ceir-accent)';
+      paytaxWrap.style.display = 'flex';
+    }
   }
 
-  function setStatus(state, text) {
-    statusDot.className = 'checker-dot' + (state ? ' ' + state : '');
-    statusText.textContent = text;
-  }
+  singleTab.onclick = () => switchTab('single');
+  batchTab.onclick = () => switchTab('batch');
+  appidTab.onclick = () => switchTab('appid');
+  paytaxTab.onclick = () => switchTab('paytax');
 
-  function setTokenStatus(state, text) {
-    tokenStatus.className = 'input-status' + (state ? ' ' + state : '');
-    tokenStatus.textContent = text;
-  }
-
-  function updateTokenFieldUI(state) {
-    tokenInput.classList.remove('token-ready', 'token-error');
-    if (state === 'ready') {
-      tokenInput.classList.add('token-ready');
-      setTokenStatus('ready', '✓ Ready');
-    } else if (state === 'error') {
-      tokenInput.classList.add('token-error');
-      setTokenStatus('error', '⚠ Error');
+  // Toggle Visibility
+  function toggleUI(show) {
+    if (show) {
+      overlay.style.pointerEvents = 'auto';
+      overlay.style.opacity = '1';
+      modal.style.display = 'flex';
+      requestAnimationFrame(() => {
+        modal.style.opacity = '1';
+        modal.style.transform = 'translate(-50%, -50%) scale(1)';
+      });
+      mountTurnstile();
     } else {
-      setTokenStatus('', '—');
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+      modal.style.opacity = '0';
+      modal.style.transform = 'translate(-50%, -50%) scale(.96)';
+      setTimeout(() => { modal.style.display = 'none'; }, 200);
     }
   }
 
-  function startExpiryCountdown(expiry) {
-    if (expiryTimer) clearInterval(expiryTimer);
-    expiryTimer = setInterval(() => {
-      const remaining = Math.max(0, Math.floor((expiry - Date.now()) / 1000));
-      if (remaining <= 0) {
-        clearInterval(expiryTimer);
-        expiryTimer = null;
-        cachedToken = null;
-        tokenExpiry = 0;
-        updateTokenFieldUI('error');
-        setTokenStatus('error', '⚠ Expired');
-        setStatus('error', 'Token expired');
-      } else {
-        setTokenStatus('ready', `✓ ${remaining}s`);
-      }
-    }, 1000);
-  }
+  triggerBtn.onclick = () => toggleUI(true);
+  modal.querySelector('#ceir-close-btn').onclick = () => toggleUI(false);
+  overlay.onclick = () => toggleUI(false);
 
-  function requireToken() {
-    const token = tokenInput.value.trim();
-    if (!token) {
-      writeMessage('altchaData is required. Click "Get Fresh Token" or paste manually.');
-      tokenInput.focus();
-      return null;
-    }
-    return token;
-  }
-
-  function requireImei() {
-    const imei = imeiInput.value.trim();
-    if (!/^\d{15}$/.test(imei)) {
-      writeMessage('IMEI must contain exactly 15 digits.');
-      imeiInput.focus();
-      return null;
-    }
-    return imei;
-  }
-
-  function requireReference(label) {
-    const value = referenceInput.value.trim();
-    if (!value) {
-      writeMessage(`${label} is required for this endpoint.`);
-      referenceInput.focus();
-      return null;
-    }
-    return value;
-  }
-
-  // ============================================================
-  // TURNSTILE LOADER
-  // ============================================================
-  function loadTurnstile() {
-    return new Promise((resolve, reject) => {
-      if (window.turnstile && typeof window.turnstile.render === 'function') {
-        resolve(window.turnstile);
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        const check = setInterval(() => {
-          if (window.turnstile && typeof window.turnstile.render === 'function') {
-            clearInterval(check);
-            resolve(window.turnstile);
-          }
-        }, 100);
-        setTimeout(() => {
-          clearInterval(check);
-          reject(new Error('Turnstile load timeout'));
-        }, 10000);
-      };
-      script.onerror = () => reject(new Error('Failed to load Turnstile'));
-      document.head.appendChild(script);
-    });
-  }
-
-  // ============================================================
-  // TOKEN MINTING
-  // ============================================================
-  async function mintToken(action) {
-    const turnstile = await loadTurnstile();
-    const sitekey = SITEKEYS[action] || SITEKEYS['verify-imei'];
-
-    const container = document.createElement('div');
-    container.style.cssText = 'position:fixed;left:-9999px;top:0;width:300px;height:65px;overflow:hidden;';
-    document.body.appendChild(container);
-
-    return new Promise((resolve, reject) => {
-      let widgetId = null;
-      let settled = false;
-
-      const cleanup = () => {
-        try { if (widgetId !== null) turnstile.remove(widgetId); } catch (e) {}
-        try { container.remove(); } catch (e) {}
-      };
-
-      const timeout = setTimeout(() => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        reject(new Error('Token mint timeout (' + (MINT_TIMEOUT / 1000) + 's)'));
-      }, MINT_TIMEOUT);
-
-      try {
-        widgetId = turnstile.render(container, {
-          sitekey: sitekey,
-          action: action,
-          execution: 'execute',
-          appearance: 'interaction-only',
-          theme: 'light',
-          language: 'en',
-          callback: (token) => {
-            if (settled) return;
-            settled = true;
-            clearTimeout(timeout);
-            cleanup();
-            resolve(token);
-          },
-          'error-callback': (err) => {
-            if (settled) return;
-            settled = true;
-            clearTimeout(timeout);
-            cleanup();
-            reject(new Error('Turnstile error: ' + String(err)));
-          },
-          'expired-callback': () => {
-            if (settled) return;
-            settled = true;
-            clearTimeout(timeout);
-            cleanup();
-            reject(new Error('Token expired before use'));
-          }
-        });
-
-        if (turnstile.execute) {
-          try { turnstile.execute(widgetId); } catch (e) {}
-        }
-      } catch (e) {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timeout);
-        cleanup();
-        reject(e);
-      }
-    });
-  }
-
-  async function getToken(action) {
-    if (cachedToken && Date.now() < tokenExpiry) {
-      return cachedToken;
-    }
-    cachedToken = await mintToken(action);
-    tokenExpiry = Date.now() + TOKEN_TTL;
-    return cachedToken;
-  }
-
-  function clearTokenState() {
-    cachedToken = null;
-    tokenExpiry = 0;
-    if (expiryTimer) {
-      clearInterval(expiryTimer);
-      expiryTimer = null;
-    }
-  }
-
-  // ============================================================
-  // HTTP REQUEST
-  // ============================================================
-  async function request(url, options) {
-    const buttonsEnabled = buttons.map((b) => !b.disabled);
-    buttons.forEach((b) => { b.disabled = true; });
-    writeMessage('Requesting CEIR API...');
-    setStatus('', 'Requesting');
-
+  // Turnstile Widget Loader
+  function mountTurnstile() {
+    if (turnstileWidgetId !== null || !window.turnstile) return;
     try {
-      const response = await fetch(url, options);
-      const text = await response.text();
-
-      if (!response.ok) {
-        let hint = '';
-        if (response.status === 403) {
-          hint = '\n\n⚠ Token rejected or Cloudflare blocked. Click "Get Fresh Token" to mint a new one.';
-        } else if (response.status === 401) {
-          hint = '\n\n⚠ Token expired or invalid. Click "Get Fresh Token" to mint a new one.';
+      turnstileWidgetId = window.turnstile.render(turnstileSlot, {
+        sitekey: TURNSTILE_DEFAULT,
+        callback: (token) => {
+          turnstileToken = token;
+          turnstileStatus.innerHTML = '<span style="color:var(--ceir-green);font-weight:600">● Token ready</span>';
+          turnstileStatus.style.borderColor = 'var(--ceir-green)';
+          turnstileStatus.style.background = 'var(--ceir-green-bg)';
+          turnstileResetBtn.style.display = 'inline-block';
+        },
+        'expired-callback': () => {
+          turnstileToken = null;
+          turnstileStatus.innerHTML = '<span style="color:var(--ceir-amber);font-weight:600">● Token expired</span>';
         }
-        writeMessage(`HTTP ${response.status} ${response.statusText}${hint}\n\n${text.slice(0, 2000)}`);
-        setStatus('error', 'HTTP ' + response.status);
-        if (response.status === 401 || response.status === 403) {
-          updateTokenFieldUI('error');
-        }
-        return;
-      }
-
-      setStatus('ready', 'OK ' + response.status);
-      try {
-        writeMessage(JSON.parse(text));
-      } catch {
-        writeMessage(text.slice(0, 8000) || 'Empty response.');
-      }
-    } catch (error) {
-      writeMessage(`Network error: ${error instanceof Error ? error.message : String(error)}`);
-      setStatus('error', 'Network error');
-    } finally {
-      buttons.forEach((b, i) => { b.disabled = buttonsEnabled[i]; });
-    }
+      });
+    } catch (e) {}
   }
 
-  function getJsonHeaders() {
-    return {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
-  }
-
-  // ============================================================
-  // UI EVENTS
-  // ============================================================
-  toggleButton.addEventListener('click', () => {
-    const collapsed = panel.classList.toggle('checker-collapsed');
-    toggleButton.textContent = collapsed ? 'Show' : 'Hide';
-    toggleButton.setAttribute('aria-expanded', String(!collapsed));
-  });
-
-  imeiInput.addEventListener('input', () => {
-    imeiInput.value = imeiInput.value.replace(/\D/g, '').slice(0, 15);
-  });
-
-  tokenInput.addEventListener('input', () => {
-    // Manual edit — reset indicator
-    updateTokenFieldUI('');
-    if (cachedToken !== tokenInput.value.trim()) {
-      clearTokenState();
+  turnstileResetBtn.onclick = () => {
+    if (window.turnstile && turnstileWidgetId !== null) {
+      window.turnstile.reset(turnstileWidgetId);
+      turnstileToken = null;
+      turnstileStatus.innerHTML = '<span style="color:var(--ceir-amber);font-weight:600">● No token</span> <span style="color:var(--ceir-muted);font-size:10px">— click verify</span>';
+      turnstileStatus.style.borderColor = 'var(--ceir-amber)';
+      turnstileStatus.style.background = 'var(--ceir-amber-bg)';
+      turnstileResetBtn.style.display = 'none';
     }
-  });
+  };
 
-  // ============================================================
-  // MINT TOKEN
-  // ============================================================
-  mintButton.addEventListener('click', async () => {
-    if (minting) return;
-    minting = true;
-    mintButton.disabled = true;
-    setStatus('', 'Minting');
-    setTokenStatus('', '…');
-    writeMessage('Minting fresh token via Cloudflare Turnstile...\n\nIf a checkbox appears, click it to continue.');
-
-    try {
-      const token = await getToken('verify-imei');
-      tokenInput.value = token;
-      updateTokenFieldUI('ready');
-      startExpiryCountdown(tokenExpiry);
-      setStatus('ready', 'Token ready');
-      writeMessage(
-        'Token ready (expires in 4 min)\n\n' +
-        'Action:   verify-imei\n' +
-        'Length:   ' + token.length + ' chars\n' +
-        'Preview:  ' + token.slice(0, 80) + '...'
-      );
-    } catch (error) {
-      updateTokenFieldUI('error');
-      setStatus('error', 'Mint failed');
-      writeMessage(
-        'Token mint failed.\n\n' +
-        (error instanceof Error ? error.message : String(error)) + '\n\n' +
-        'Fallback: Open the official CEIR page, solve Turnstile manually, ' +
-        'then copy altchaData from Network tab (F12 → Network → filter "altchaData").'
-      );
-    } finally {
-      minting = false;
-      mintButton.disabled = false;
-    }
-  });
-
-  clearButton.addEventListener('click', () => {
-    clearTokenState();
-    tokenInput.value = '';
-    updateTokenFieldUI('');
-    setStatus('', 'Idle');
-    writeMessage('Token cleared.');
-  });
-
-  // ============================================================
-  // API ACTIONS
-  // ============================================================
-  panel.querySelector('[data-endpoint="verify"]').addEventListener('click', () => {
-    const token = requireToken();
-    const imei = requireImei();
-    if (!token || !imei) return;
-    const url = `${BASE}/IMEI/Verify?altchaData=${encodeURIComponent(token)}`;
-    request(url, {
+  // API Call - Verify Single / Batch
+  async function runVerify(imeiList) {
+    const res = await fetch(`https://ceir.gov.mm/openapi/API/IMEI/Verify?altchaData=${encodeURIComponent(turnstileToken)}`, {
       method: 'POST',
-      headers: getJsonHeaders(),
-      body: JSON.stringify({ imeis: [imei] })
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(imeiList)
     });
-  });
+    return await res.json();
+  }
 
-  panel.querySelector('[data-endpoint="device"]').addEventListener('click', () => {
-    const token = requireToken();
-    const imei = requireImei();
-    if (!token || !imei) return;
-    const query = new URLSearchParams({ altchaData: token, imei });
-    request(`${BASE}/Device/personal-device-info?${query}`, {
-      headers: { Accept: 'application/json' }
+  // API Call - Device Info
+  async function runDeviceInfo(imei) {
+    const res = await fetch(`https://ceir.gov.mm/openapi/API/Device/personal-device-info?altchaData=${encodeURIComponent(turnstileToken)}&imei=${encodeURIComponent(imei)}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
     });
-  });
+    return await res.json();
+  }
 
-  panel.querySelector('[data-endpoint="status"]').addEventListener('click', () => {
-    const token = requireToken();
-    const reference = requireReference('Declaration ID');
-    if (!token || !reference) return;
-    const query = new URLSearchParams({ DeclarationID: reference, altchaData: token });
-    request(`${BASE}/IMEI/RegistrationStatus?${query}`, {
-      headers: { Accept: 'application/json' }
+  // API Call - Registration Status
+  async function runRegStatus(declId) {
+    const res = await fetch(`https://ceir.gov.mm/openapi/API/IMEI/RegistrationStatus?DeclarationID=${encodeURIComponent(declId)}&altchaData=${encodeURIComponent(turnstileToken)}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
     });
-  });
+    return await res.json();
+  }
 
-  panel.querySelector('[data-endpoint="applicant"]').addEventListener('click', () => {
-    const token = requireToken();
-    const reference = requireReference('Declaration hash');
-    if (!token || !reference) return;
-    const query = new URLSearchParams({ altchaData: token, declarationHash: reference });
-    request(`${BASE}/request/applicant?${query}`, {
-      headers: { Accept: 'application/json' }
-    });
-  });
+  // Check Action Trigger
+  btnRun.onclick = async () => {
+    if (!turnstileToken) {
+      alert('ကျေးဇူးပြု၍ Turnstile Captcha Checkbox ကို အရင်နှိပ်ပါ');
+      return;
+    }
 
-  // ============================================================
-  // READY
-  // ============================================================
-  setStatus('', 'Idle');
-  updateTokenFieldUI('');
+    btnRun.disabled = true;
+    statusEl.textContent = 'Running check...';
+    resultsEl.innerHTML = '<div style="text-align:center;padding-top:100px;color:var(--ceir-muted)">Checking CEIR database...</div>';
+
+    try {
+      if (activeTab === 'single') {
+        const imei = imeiSingle.value.trim();
+        if (!imei || imei.length !== 15) throw new Error('IMEI ၁၅ လုံးတိတိ ရိုက်ထည့်ပေးပါ');
+
+        const [verifyRes, devRes] = await Promise.all([
+          runVerify([imei]),
+          runDeviceInfo(imei).catch(() => null)
+        ]);
+
+        const item = verifyRes?.IMEI_CHECK_LIST?.[0] || {};
+        resultsEl.innerHTML = `
+          <div class="ceir-card">
+            <h3 style="font-weight:700;font-size:16px;color:var(--ceir-accent);margin-bottom:8px">IMEI: ${imei}</h3>
+            <p><b>Block State:</b> ${item.blockState || 'N/A'}</p>
+            <p><b>Payment State:</b> ${item.paymentState || 'N/A'}</p>
+            <p><b>Can Pay:</b> ${item.canPay ? 'Yes' : 'No'}</p>
+            <p><b>Grace Period:</b> ${item.endOfGracePeriod || 'N/A'}</p>
+            ${devRes?.gsmaBrandName ? `<hr style="margin:10px 0;border-color:var(--ceir-border)"><p><b>Brand:</b> ${devRes.gsmaBrandName} \vert{} <b>Model:</b>${devRes.gsmaModelName || 'N/A'}</p>` : ''}
+          </div>
+        `;
+      } else if (activeTab === 'appid') {
+        const declId = appidInput.value.trim();
+        if (!declId) throw new Error('Declaration ID ရိုက်ထည့်ပေးပါ');
+
+        const statusRes = await runRegStatus(declId);
+        resultsEl.innerHTML = `
+          <div class="ceir-card">
+            <pre style="font-family:monospace;font-size:11px;white-space:pre-wrap;word-break:break-all">${JSON.stringify(statusRes, null, 2)}</pre>
+          </div>
+        `;
+      } else if (activeTab === 'batch') {
+        const lines = imeiBatch.value.split('\n').map(l => l.trim()).filter(l => l.length === 15);
+        if (!lines.length) throw new Error('မှန်ကန်သော ၁၅ လုံးပါ IMEI တစ်ခုမှ မတွေ့ပါ');
+
+        const batchRes = await runVerify(lines);
+        const list = batchRes?.IMEI_CHECK_LIST || [];
+        let rows = list.map(it => `
+          <tr>
+            <td style="font-family:monospace;font-weight:700">${it.IMEI}</td>
+            <td>${it.blockState}</td>
+            <td>${it.paymentState}</td>
+            <td>${it.canPay ? 'Yes' : 'No'}</td>
+          </tr>
+        `).join('');
+
+        resultsEl.innerHTML = `
+          <table class="ceir-table">
+            <thead>
+              <tr><th>IMEI</th><th>Block State</th><th>Payment State</th><th>Can Pay</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+      }
+      statusEl.textContent = 'Done';
+    } catch (err) {
+      statusEl.textContent = 'Error';
+      resultsEl.innerHTML = `<div class="ceir-card" style="border-color:var(--ceir-red);color:var(--ceir-red)">${err.message}</div>`;
+    } finally {
+      btnRun.disabled = false;
+    }
+  };
+
+  // Dark/Light Mode Switch
+  themeSwitch.onchange = () => {
+    if (themeSwitch.checked) {
+      modal.classList.add('ceir-light');
+    } else {
+      modal.classList.remove('ceir-light');
+    }
+  };
+
+  console.log('[CEIR Checker] Injected successfully without license lock.');
 })();
